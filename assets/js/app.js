@@ -18,4 +18,10 @@ import "phoenix_html"
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
 
+import Vue from 'vue/dist/vue.common'
 import socket from "./socket"
+
+new Vue({
+  el: '#main',
+  data: { message: "Hi there!" }
+})
