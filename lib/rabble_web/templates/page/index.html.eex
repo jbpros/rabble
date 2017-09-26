@@ -1,4 +1,5 @@
 <div id="messages"></div>
-<input id="chat-input" type="text"></input>
-
-<div id="main">{{ message }}</div>
+<form id="chat-input" v-on:submit.prevent="send">
+  <input v-model="text"></input>
+  <button type="submit">Send</button>
+</form>

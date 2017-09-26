@@ -3,7 +3,8 @@
 
 // To use Phoenix channels, the first step is to import Socket
 // and connect at the socket path in "lib/web/endpoint.ex":
-import {Socket} from "phoenix"
+import { Socket } from "phoenix"
+import Vue from 'vue/dist/vue.common'
 
 const socket = new Socket("/socket", {params: {token: window.userToken, nickname: "jbpros"}})
 
@@ -58,13 +59,6 @@ const channel           = socket.channel("room:lobby", {})
 const chatInput         = document.querySelector("#chat-input")
 const messagesContainer = document.querySelector("#messages")
 
-chatInput.addEventListener("keypress", event => {
-  if(event.keyCode === 13){
-    channel.push("new_msg", {body: chatInput.value})
-    chatInput.value = ""
-  }
-})
-
 channel.on("new_msg", payload => {
   const messageItem = document.createElement("li");
   messageItem.innerText = `[${Date()}] ${payload.nickname} ${payload.body}`
@@ -74,5 +68,18 @@ channel.on("new_msg", payload => {
 channel.join()
   .receive("ok", resp => { console.log("Joined successfully", resp) })
   .receive("error", resp => { console.log("Unable to join", resp) })
+
+new Vue({
+  el: "#chat-input",
+  data: {
+    text: ""
+  },
+  methods: {
+    send: function () {
+      channel.push("new_msg", { body: this.text })
+      this.text = ""
+    }
+  }
+})
 
 export default socket
