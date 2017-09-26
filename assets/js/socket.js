@@ -56,24 +56,11 @@ socket.connect()
 
 // Now that you are connected, you can join channels with a topic:
 const channel           = socket.channel("room:lobby", {})
-const chatInput         = document.querySelector("#chat-input")
 const messagesContainer = document.querySelector("#messages")
-
-channel.on("new_msg", payload => {
-  const messageItem = document.createElement("li");
-  messageItem.innerText = `[${Date()}] ${payload.nickname} ${payload.body}`
-  messagesContainer.appendChild(messageItem)
-})
-
-channel.join()
-  .receive("ok", resp => { console.log("Joined successfully", resp) })
-  .receive("error", resp => { console.log("Unable to join", resp) })
 
 new Vue({
   el: "#chat-input",
-  data: {
-    text: ""
-  },
+  data: { text: "" },
   methods: {
     send: function () {
       channel.push("new_msg", { body: this.text })
@@ -81,5 +68,16 @@ new Vue({
     }
   }
 })
+
+const messagesVue = new Vue({
+  el: "#messages",
+  data: { messages: []}
+})
+
+channel.on("new_msg", payload => messagesVue.messages.push(payload))
+
+channel.join()
+  .receive("ok", resp => { console.log("Joined successfully", resp) })
+  .receive("error", resp => { console.log("Unable to join", resp) })
 
 export default socket

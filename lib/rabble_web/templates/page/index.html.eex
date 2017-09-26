@@ -1,4 +1,6 @@
-<div id="messages"></div>
+<ul id="messages">
+  <li v-for="message in messages"><strong>{{ message.nickname}}:</strong> {{ message.body }}</li>
+</ul>
 <form id="chat-input" v-on:submit.prevent="send">
   <input v-model="text"></input>
   <button type="submit">Send</button>
