@@ -1,7 +1,9 @@
-import { Socket } from "phoenix"
+import { Socket } from 'phoenix'
 import Vue from 'vue/dist/vue.common'
 
-const socket = new Socket("/socket", {params: {token: window.userToken, nickname: "jbpros"}})
+const socket = new Socket('/socket', {
+  params: { token: window.userToken, nickname: 'jbpros' },
+})
 
 // When you connect, you'll often need to authenticate the client.
 // For example, imagine you have an authentication plug, `MyAuth`,
@@ -49,28 +51,40 @@ const socket = new Socket("/socket", {params: {token: window.userToken, nickname
 
 socket.connect()
 
-const channel = socket.channel("room:lobby", {})
+const channel = socket.channel('room:lobby', {})
 
 new Vue({
-  el: "#chat-input",
-  data: { text: "" },
+  el: '#chat-input',
+  data: { text: '' },
   methods: {
-    send: function () {
-      channel.push("new_msg", { body: this.text })
-      this.text = ""
-    }
-  }
+    send: function() {
+      channel.push('new_msg', { body: this.text })
+      this.text = ''
+    },
+  },
 })
 
 const messagesVue = new Vue({
-  el: "#messages",
-  data: { messages: []}
+  el: '#messages',
+  data: { messages: [] },
 })
 
-channel.on("new_msg", payload => messagesVue.messages.push(payload))
+const connectionStatusVue = new Vue({
+  el: '#connection-status',
+  data: { status: 'Unknown', resp: '' },
+})
 
-channel.join()
-  .receive("ok", resp => { console.log("Joined successfully", resp) })
-  .receive("error", resp => { console.log("Unable to join", resp) })
+channel.on('new_msg', payload => messagesVue.messages.push(payload))
+
+channel
+  .join()
+  .receive('ok', resp => {
+    connectionStatusVue.status = 'Connected'
+    connectionStatusVue.resp = resp
+  })
+  .receive('error', resp => {
+    connectionStatusVue.status = 'Connection failed'
+    connectionStatusVue.resp = resp
+  })
 
 export default socket
