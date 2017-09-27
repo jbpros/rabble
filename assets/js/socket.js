@@ -53,9 +53,40 @@ socket.connect()
 
 const channel = socket.channel('room:lobby', {})
 
-new Vue({
-  el: '#chat-input',
-  data: { text: '' },
+const state = {
+  connection: {
+    status: 'Unknown',
+    resp: null,
+  },
+  messages: [],
+}
+
+Vue.component('connection-status', {
+  template: `<div>
+      {{ status }} (<code>{{ JSON.stringify(resp) }}</code>)
+    </div>`,
+  data: function() {
+    return state.connection
+  },
+})
+
+Vue.component('messages', {
+  template: `<ul>
+      <li v-for="message in messages"><strong>{{ message.nickname}}:</strong> {{ message.body }}</li>
+    </ul>`,
+  data: function() {
+    return { messages: state.messages }
+  },
+})
+
+Vue.component('chat-input', {
+  template: `<form id="chat-input" v-on:submit.prevent="send">
+      <input v-model="text" placeholder="Your comment..."></input>
+      <button type="submit">Send</button>
+    </form>`,
+  data: function() {
+    return { text: '' }
+  },
   methods: {
     send: function() {
       channel.push('new_msg', { body: this.text })
@@ -64,27 +95,28 @@ new Vue({
   },
 })
 
-const messagesVue = new Vue({
-  el: '#messages',
-  data: { messages: [] },
+Vue.component('chat', {
+  template: `<div>
+      <messages></messages>
+      <chat-input></chat-input>
+    </div>`,
 })
 
-const connectionStatusVue = new Vue({
-  el: '#connection-status',
-  data: { status: 'Unknown', resp: '' },
+new Vue({
+  el: '#main',
 })
 
-channel.on('new_msg', payload => messagesVue.messages.push(payload))
+channel.on('new_msg', payload => state.messages.push(payload))
 
 channel
   .join()
   .receive('ok', resp => {
-    connectionStatusVue.status = 'Connected'
-    connectionStatusVue.resp = resp
+    state.connection.status = 'connected'
+    state.connection.resp = resp
   })
   .receive('error', resp => {
-    connectionStatusVue.status = 'Connection failed'
-    connectionStatusVue.resp = resp
+    state.connection.status = 'failed'
+    state.connection.resp = resp
   })
 
 export default socket
