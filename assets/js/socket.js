@@ -61,25 +61,25 @@ const state = {
   messages: [],
 }
 
-Vue.component('connection-status', {
+const ConnectionStatus = {
   template: `<div>
       {{ status }} (<code>{{ JSON.stringify(resp) }}</code>)
     </div>`,
   data: function() {
     return state.connection
   },
-})
+}
 
-Vue.component('messages', {
+const Messages = {
   template: `<ul>
       <li v-for="message in messages"><strong>{{ message.nickname}}:</strong> {{ message.body }}</li>
     </ul>`,
   data: function() {
     return { messages: state.messages }
   },
-})
+}
 
-Vue.component('chat-input', {
+const ChatInput = {
   template: `<form id="chat-input" v-on:submit.prevent="send">
       <input v-model="text" placeholder="Your comment..."></input>
       <button type="submit">Send</button>
@@ -93,17 +93,22 @@ Vue.component('chat-input', {
       this.text = ''
     },
   },
-})
+}
 
-Vue.component('chat', {
+const Chat = {
   template: `<div>
       <messages></messages>
       <chat-input></chat-input>
     </div>`,
-})
+  components: {
+    ChatInput,
+    Messages,
+  },
+}
 
 new Vue({
   el: '#main',
+  components: { Chat, ConnectionStatus },
 })
 
 channel.on('new_msg', payload => state.messages.push(payload))
