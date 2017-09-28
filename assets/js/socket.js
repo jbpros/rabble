@@ -1,5 +1,6 @@
 import { Socket } from 'phoenix'
 import Vue from 'vue/dist/vue.common'
+import ChatInput from './components/chat-input.vue'
 
 const socket = new Socket('/socket', {
   params: { token: window.userToken, nickname: 'jbpros' },
@@ -79,31 +80,16 @@ const Messages = {
   },
 }
 
-const ChatInput = {
-  template: `<form id="chat-input" v-on:submit.prevent="send">
-      <input v-model="text" placeholder="Your comment..."></input>
-      <button type="submit">Send</button>
-    </form>`,
-  data: function() {
-    return { text: '' }
-  },
-  methods: {
-    send: function() {
-      channel.push('new_msg', { body: this.text })
-      this.text = ''
-    },
-  },
-}
-
 const Chat = {
   template: `<div>
       <messages></messages>
-      <chat-input></chat-input>
+      <chat-input v-bind:channel="channel"></chat-input>
     </div>`,
   components: {
     ChatInput,
     Messages,
   },
+  props: { channel: { type: Object } },
 }
 
 import HelloWorld from './hello-world.vue'
@@ -111,6 +97,7 @@ import HelloWorld from './hello-world.vue'
 new Vue({
   el: '#main',
   components: { Chat, ConnectionStatus, HelloWorld },
+  data: { channel },
 })
 
 channel.on('new_msg', payload => state.messages.push(payload))
