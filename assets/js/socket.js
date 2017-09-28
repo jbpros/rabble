@@ -106,9 +106,11 @@ const Chat = {
   },
 }
 
+import HelloWorld from './hello-world.vue'
+
 new Vue({
   el: '#main',
-  components: { Chat, ConnectionStatus },
+  components: { Chat, ConnectionStatus, HelloWorld },
 })
 
 channel.on('new_msg', payload => state.messages.push(payload))
