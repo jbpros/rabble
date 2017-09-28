@@ -92,11 +92,9 @@ const Chat = {
   props: { channel: { type: Object } },
 }
 
-import HelloWorld from './hello-world.vue'
-
 new Vue({
   el: '#main',
-  components: { Chat, ConnectionStatus, HelloWorld },
+  components: { Chat, ConnectionStatus },
   data: { channel },
 })
 
