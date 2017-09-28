@@ -1,7 +1,9 @@
 defmodule RabbleWeb.RoomChannel do
   use Phoenix.Channel
+  alias Rabble.Presence
 
   def join("room:lobby", _message, socket) do
+    send(self(), :after_join)
     {:ok, socket}
   end
 
@@ -18,4 +20,12 @@ defmodule RabbleWeb.RoomChannel do
   #   push socket, "new_msg", payload
   #   {:noreply, socket}
   # end
+
+  def handle_info(:after_join, socket) do
+    push socket, "presence_state", Presence.list(socket)
+    {:ok, _} = Presence.track(socket, socket.assigns.nickname, %{
+      online_at: inspect(System.system_time(:seconds))
+    })
+    {:noreply, socket}
+  end
 end
