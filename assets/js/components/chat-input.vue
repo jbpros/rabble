@@ -21,3 +21,7 @@ export default {
   props: { channel: { type: Object } },
 }
 </script>
+
+<style scoped>
+button { color: red; }
+</style>
