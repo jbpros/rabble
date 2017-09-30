@@ -1,11 +1,8 @@
 import { Socket } from 'phoenix'
 import Vue from 'vue'
-import Vuex from 'vuex'
-import ChatInput from './components/chat-input.vue'
+import Chat from './components/chat.vue'
 import ConnectionStatus from './components/connection-status.vue'
-const socket = new Socket('/socket', {
-  params: { token: window.userToken, nickname: 'jbpros' },
-})
+import store from './store'
 
 // When you connect, you'll often need to authenticate the client.
 // For example, imagine you have an authentication plug, `MyAuth`,
@@ -51,72 +48,12 @@ const socket = new Socket('/socket', {
 // Finally, pass the token on connect as below. Or remove it
 // from connect if you don't care about authentication.
 
+const socket = new Socket('/socket', {
+  params: { token: window.userToken, nickname: 'jbpros' },
+})
 socket.connect()
 
 const channel = socket.channel('room:lobby', {})
-
-const Messages = {
-  template: `<ul>
-      <li v-for="message in messages"><strong>{{ message.nickname}}:</strong> {{ message.body }}</li>
-    </ul>`,
-  computed: {
-    messages() {
-      return this.$store.getters.messages
-    },
-  },
-}
-
-const Chat = {
-  template: `<div>
-      <messages></messages>
-      <chat-input v-bind:channel="channel"></chat-input>
-    </div>`,
-  components: {
-    ChatInput,
-    Messages,
-  },
-  props: { channel: { type: Object } },
-}
-
-Vue.use(Vuex)
-
-const store = new Vuex.Store({
-  state: {
-    channel: null,
-    messages: [],
-  },
-  getters: {
-    isConnected(state) {
-      return !!state.channel
-    },
-    messages(state) {
-      return state.messages
-    },
-  },
-  mutations: {
-    setChannel(state, { channel }) {
-      state.channel = channel
-    },
-    storeMessage(state, { payload }) {
-      state.messages.push(payload)
-    },
-  },
-  actions: {
-    connect({ commit }, { channel }) {
-      commit('setChannel', { channel })
-    },
-    receiveNewMessage({ commit }, { payload }) {
-      commit('storeMessage', { payload })
-    },
-  },
-})
-
-new Vue({
-  el: '#main',
-  components: { Chat, ConnectionStatus },
-  data: { channel },
-  store,
-})
 
 channel.on('new_msg', payload =>
   store.dispatch('receiveNewMessage', { payload })
@@ -130,5 +67,12 @@ channel
   .receive('error', resp => {
     store.dispatch('connection failure', { channel, resp })
   })
+
+new Vue({
+  el: '#main',
+  components: { Chat, ConnectionStatus },
+  data: { channel },
+  store,
+})
 
 export default socket
