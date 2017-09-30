@@ -1,7 +1,8 @@
 import { Socket } from 'phoenix'
-import Vue from 'vue/dist/vue.common'
+import Vue from 'vue'
+import Vuex from 'vuex'
 import ChatInput from './components/chat-input.vue'
-
+import ConnectionStatus from './components/connection-status.vue'
 const socket = new Socket('/socket', {
   params: { token: window.userToken, nickname: 'jbpros' },
 })
@@ -54,29 +55,14 @@ socket.connect()
 
 const channel = socket.channel('room:lobby', {})
 
-const state = {
-  connection: {
-    status: 'Unknown',
-    resp: null,
-  },
-  messages: [],
-}
-
-const ConnectionStatus = {
-  template: `<div>
-      {{ status }} (<code>{{ JSON.stringify(resp) }}</code>)
-    </div>`,
-  data: function() {
-    return state.connection
-  },
-}
-
 const Messages = {
   template: `<ul>
       <li v-for="message in messages"><strong>{{ message.nickname}}:</strong> {{ message.body }}</li>
     </ul>`,
-  data: function() {
-    return { messages: state.messages }
+  computed: {
+    messages() {
+      return this.$store.getters.messages
+    },
   },
 }
 
@@ -92,23 +78,57 @@ const Chat = {
   props: { channel: { type: Object } },
 }
 
+Vue.use(Vuex)
+
+const store = new Vuex.Store({
+  state: {
+    channel: null,
+    messages: [],
+  },
+  getters: {
+    isConnected(state) {
+      return !!state.channel
+    },
+    messages(state) {
+      return state.messages
+    },
+  },
+  mutations: {
+    setChannel(state, { channel }) {
+      state.channel = channel
+    },
+    storeMessage(state, { payload }) {
+      state.messages.push(payload)
+    },
+  },
+  actions: {
+    connect({ commit }, { channel }) {
+      commit('setChannel', { channel })
+    },
+    receiveNewMessage({ commit }, { payload }) {
+      commit('storeMessage', { payload })
+    },
+  },
+})
+
 new Vue({
   el: '#main',
   components: { Chat, ConnectionStatus },
   data: { channel },
+  store,
 })
 
-channel.on('new_msg', payload => state.messages.push(payload))
+channel.on('new_msg', payload =>
+  store.dispatch('receiveNewMessage', { payload })
+)
 
 channel
   .join()
   .receive('ok', resp => {
-    state.connection.status = 'connected'
-    state.connection.resp = resp
+    store.dispatch('connect', { channel, resp })
   })
   .receive('error', resp => {
-    state.connection.status = 'failed'
-    state.connection.resp = resp
+    store.dispatch('connection failure', { channel, resp })
   })
 
 export default socket
