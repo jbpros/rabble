@@ -1,5 +1,5 @@
 <div id="main">
   <connection-status></connection-status>
   <h2>Chat</h2>
-  <chat v-bind:channel="channel"></chat>
+  <chat></chat>
 </div>

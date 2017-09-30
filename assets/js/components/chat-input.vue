@@ -14,11 +14,10 @@ export default {
   },
   methods: {
     send: function() {
-      this.channel.push('new_msg', { body: this.text })
+      this.$store.dispatch('sendMessage', { body: this.text })
       this.text = ''
     },
   },
-  props: { channel: { type: Object } },
 }
 </script>
 

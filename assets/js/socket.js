@@ -1,4 +1,3 @@
-import { Socket } from 'phoenix'
 import Vue from 'vue'
 import Chat from './components/chat.vue'
 import ConnectionStatus from './components/connection-status.vue'
@@ -48,31 +47,12 @@ import store from './store'
 // Finally, pass the token on connect as below. Or remove it
 // from connect if you don't care about authentication.
 
-const socket = new Socket('/socket', {
-  params: { token: window.userToken, nickname: 'jbpros' },
-})
-socket.connect()
-
-const channel = socket.channel('room:lobby', {})
-
-channel.on('new_msg', payload =>
-  store.dispatch('receiveNewMessage', { payload })
-)
-
-channel
-  .join()
-  .receive('ok', resp => {
-    store.dispatch('connect', { channel, resp })
-  })
-  .receive('error', resp => {
-    store.dispatch('connection failure', { channel, resp })
-  })
-
 new Vue({
   el: '#main',
   components: { Chat, ConnectionStatus },
-  data: { channel },
   store,
 })
 
-export default socket
+store.dispatch('connect')
+
+export default {}
