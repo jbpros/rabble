@@ -1,8 +1,8 @@
 import { Socket } from 'phoenix'
 
-const connectSocket = ({ onOk, onError, onMessage }) => {
+const connectSocket = ({ nickname, token, onOk, onError, onMessage }) => {
   const socket = new Socket('/socket', {
-    params: { token: window.userToken, nickname: 'jbpros' },
+    params: { token, nickname },
   })
   socket.connect()
 

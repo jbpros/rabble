@@ -29,8 +29,10 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    connect({ commit, dispatch }) {
+    connect({ commit, dispatch }, { nickname, token }) {
       connectSocket({
+        nickname,
+        token,
         onOk: (resp, channel) => commit('setChannel', { channel, resp }),
         onError: resp => alert('Failed to connect: ' + JSON.stringify(resp)),
         onMessage: payload => dispatch('receiveMessage', { payload }),

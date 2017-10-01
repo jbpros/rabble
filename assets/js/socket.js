@@ -53,6 +53,6 @@ new Vue({
   store,
 })
 
-store.dispatch('connect')
+store.dispatch('connect', { token: window.userToken, nickname: 'jbpros' })
 
 export default {}
