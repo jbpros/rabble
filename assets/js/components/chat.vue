@@ -1,7 +1,7 @@
 <template>
   <div>
     <messages></messages>
-    <chat-input v-bind:channel="channel"></chat-input>
+    <chat-input></chat-input>
   </div>
 </template>
 
