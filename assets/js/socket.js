@@ -53,6 +53,10 @@ new Vue({
   store,
 })
 
-store.dispatch('connect', { token: window.userToken, nickname: 'jbpros' })
+store.dispatch('connect', {
+  token: window.userToken,
+  nickname:
+    (window.location.search && window.location.search.slice(1)) || 'nobody',
+})
 
 export default {}
