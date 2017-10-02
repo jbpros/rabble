@@ -14,6 +14,5 @@ export default {
     ChatInput,
     Messages,
   },
-  props: { channel: { type: Object } },
 }
 </script>
