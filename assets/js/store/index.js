@@ -7,6 +7,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     channel: null,
+    isConnecting: false,
     messages: [],
     presences: {},
   },
@@ -17,6 +18,9 @@ export default new Vuex.Store({
     isConnected(state) {
       return !!state.channel
     },
+    isConnecting(state) {
+      return state.isConnecting
+    },
     messages(state) {
       return state.messages
     },
@@ -25,11 +29,19 @@ export default new Vuex.Store({
     },
   },
   mutations: {
+    failToConnect(state, { resp }) {
+      state.isConnecting = false
+      alert(`Failed to connect (${JSON.stringify(resp)})`)
+    },
     setChannel(state, { channel }) {
       state.channel = channel
+      state.isConnecting = false
     },
     setPresences(state, { presences }) {
       state.presences = presences
+    },
+    startConnecting(state) {
+      state.isConnecting = true
     },
     storeMessage(state, { payload }) {
       state.messages.push(payload)
@@ -37,11 +49,12 @@ export default new Vuex.Store({
   },
   actions: {
     connect({ commit, dispatch }, { nickname, token }) {
+      commit('startConnecting')
       connectSocket({
         nickname,
         token,
         onOk: (resp, channel) => commit('setChannel', { channel, resp }),
-        onError: resp => alert('Failed to connect: ' + JSON.stringify(resp)),
+        onError: resp => commit('failToConnect', { resp }),
         onMessage: payload => dispatch('receiveMessage', { payload }),
         onPresences: ({ presences }) => commit('setPresences', { presences }),
       })
