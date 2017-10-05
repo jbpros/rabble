@@ -35,12 +35,16 @@ defmodule RabbleWeb.RoomChannel do
 
   def handle_info(:after_join, socket) do
     push socket, "presence_state", Presence.list(socket)
-    {:ok, _} = Presence.track(socket, socket.assigns.nickname, %{
+    {:ok, _} = Presence.track(socket, socket.assigns.nickname, init_meta(socket))
+    {:noreply, socket}
+  end
+
+  defp init_meta(socket) do
+    %{
       channel_pid: inspect(socket.channel_pid),
       online_at: socket.assigns.online_at,
       status_emoji: ""
-    })
-    {:noreply, socket}
+    }
   end
 
   defp get_presence_meta(socket) do
