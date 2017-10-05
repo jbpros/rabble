@@ -43,7 +43,7 @@ defmodule RabbleWeb.RoomChannel do
     %{
       channel_pid: inspect(socket.channel_pid),
       online_at: socket.assigns.online_at,
-      status_emoji: ""
+      status_emoji: %{native: "🕶"} # TODO: nil
     }
   end
 
