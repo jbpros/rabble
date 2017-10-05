@@ -1,6 +1,8 @@
 <template>
   <ul>
-    <li v-for="participant in participants">{{ participant.statusEmoji && participant.statusEmoji.native }} {{ participant.nickname}}</li>
+    <li v-for="participant in participants">
+      {{ participant.statusEmoji && participant.statusEmoji.native }} {{ participant.email }}
+    </li>
   </ul>
 </template>
 

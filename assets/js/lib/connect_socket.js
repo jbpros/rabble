@@ -1,7 +1,7 @@
 import { Socket, Presence } from 'phoenix'
 
 const connectSocket = ({
-  nickname,
+  email,
   token,
   onOk,
   onError,
@@ -10,7 +10,7 @@ const connectSocket = ({
 }) => {
   let presences = {}
   const socket = new Socket('/socket', {
-    params: { token, nickname },
+    params: { token, email },
   })
   socket.connect()
 

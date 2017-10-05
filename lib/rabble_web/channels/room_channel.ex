@@ -14,19 +14,19 @@ defmodule RabbleWeb.RoomChannel do
   end
 
   def handle_in("new_msg", %{"body" => body}, socket) do
-    broadcast! socket, "new_msg", %{body: body, nickname: socket.assigns.nickname}
+    broadcast! socket, "new_msg", %{body: body, email: socket.assigns.email}
     {:noreply, socket}
   end
 
   def handle_in("set_status_emoji", %{"emoji" => emoji}, socket) do
-    broadcast! socket, "_reflect_emoji", %{status_emoji: emoji, nickname: socket.assigns.nickname}
+    broadcast! socket, "_reflect_emoji", %{status_emoji: emoji, email: socket.assigns.email}
     {:noreply, socket}
   end
 
   def handle_out("_reflect_emoji", msg, socket) do
-    if socket.assigns.nickname == msg.nickname do
+    if socket.assigns.email == msg.email do
       current_meta = get_presence_meta(socket)
-      Presence.update(socket, socket.assigns.nickname, %{ current_meta |
+      Presence.update(socket, socket.assigns.email, %{ current_meta |
         status_emoji: msg.status_emoji
       })
     end
@@ -35,7 +35,7 @@ defmodule RabbleWeb.RoomChannel do
 
   def handle_info(:after_join, socket) do
     push socket, "presence_state", Presence.list(socket)
-    {:ok, _} = Presence.track(socket, socket.assigns.nickname, init_meta(socket))
+    {:ok, _} = Presence.track(socket, socket.assigns.email, init_meta(socket))
     {:noreply, socket}
   end
 
@@ -48,7 +48,7 @@ defmodule RabbleWeb.RoomChannel do
   end
 
   defp get_presence_meta(socket) do
-    Enum.find(Presence.list(socket)[socket.assigns.nickname].metas, fn(meta) ->
+    Enum.find(Presence.list(socket)[socket.assigns.email].metas, fn(meta) ->
       meta.channel_pid == inspect(socket.channel_pid)
     end)
   end

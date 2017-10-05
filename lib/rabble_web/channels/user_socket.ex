@@ -23,7 +23,7 @@ defmodule RabbleWeb.UserSocket do
     socket =
       socket
       |> assign(:online_at, inspect(System.system_time(:seconds)))
-      |> assign(:nickname,  params["nickname"])
+      |> assign(:email,  params["email"])
     {:ok, socket}
   end
 

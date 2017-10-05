@@ -4,8 +4,8 @@ import connectSocket from '../lib/connect_socket'
 
 Vue.use(Vuex)
 
-const presenceToParticipant = (nickname, presence) => ({
-  nickname,
+const presenceToParticipant = (email, presence) => ({
+  email,
   statusEmoji: presence.metas[0].status_emoji,
 })
 
@@ -14,7 +14,7 @@ export default new Vuex.Store({
     channel: null,
     isConnecting: false,
     messages: [],
-    nickname: '',
+    email: '',
     presences: {},
     status: { emoji: null },
   },
@@ -31,16 +31,16 @@ export default new Vuex.Store({
     messages(state) {
       return state.messages
     },
-    nickname(state) {
-      return state.nickname
+    email(state) {
+      return state.email
     },
     participants(state) {
-      return Object.keys(state.presences).map(nickname =>
-        presenceToParticipant(nickname, state.presences[nickname])
+      return Object.keys(state.presences).map(email =>
+        presenceToParticipant(email, state.presences[email])
       )
     },
     me(state, getters) {
-      return getters.participants.find(p => p.nickname === getters.nickname)
+      return getters.participants.find(p => p.email === getters.email)
     },
   },
   mutations: {
@@ -52,8 +52,8 @@ export default new Vuex.Store({
       state.channel = channel
       state.isConnecting = false
     },
-    setNickname(state, { nickname }) {
-      state.nickname = nickname
+    setemail(state, { email }) {
+      state.email = email
     },
     setPresences(state, { presences }) {
       state.presences = presences
@@ -69,11 +69,11 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    connect({ commit, dispatch }, { nickname, token }) {
-      commit('setNickname', { nickname })
+    connect({ commit, dispatch }, { email, token }) {
+      commit('setemail', { email })
       commit('startConnecting')
       connectSocket({
-        nickname,
+        email,
         token,
         onOk: (resp, channel) => commit('setChannel', { channel, resp }),
         onError: resp => commit('failToConnect', { resp }),
