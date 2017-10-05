@@ -25,7 +25,10 @@ defmodule RabbleWeb.RoomChannel do
 
   def handle_out("_reflect_emoji", msg, socket) do
     if socket.assigns.nickname == msg.nickname do
-      Presence.update(socket, socket.assigns.nickname, %{status_emoji: msg.status_emoji})
+      Presence.update(socket, socket.assigns.nickname, %{
+        online_at: socket.assigns.online_at,
+        status_emoji: msg.status_emoji
+      })
     end
     {:noreply, socket}
   end
@@ -33,7 +36,7 @@ defmodule RabbleWeb.RoomChannel do
   def handle_info(:after_join, socket) do
     push socket, "presence_state", Presence.list(socket)
     {:ok, _} = Presence.track(socket, socket.assigns.nickname, %{
-      online_at: inspect(System.system_time(:seconds)),
+      online_at: socket.assigns.online_at,
       status_emoji: ""
     })
     {:noreply, socket}
