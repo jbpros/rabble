@@ -4,11 +4,17 @@ import connectSocket from '../lib/connect_socket'
 
 Vue.use(Vuex)
 
+const presenceToParticipant = (nickname, presence) => ({
+  nickname,
+  statusEmoji: presence.metas[0].status_emoji,
+})
+
 export default new Vuex.Store({
   state: {
     channel: null,
     isConnecting: false,
     messages: [],
+    nickname: '',
     presences: {},
     status: { emoji: null },
   },
@@ -25,17 +31,16 @@ export default new Vuex.Store({
     messages(state) {
       return state.messages
     },
+    nickname(state) {
+      return state.nickname
+    },
     participants(state) {
-      return Object.keys(state.presences).map(nickname => ({
-        nickname,
-        statusEmoji: state.presences[nickname].metas[0].status_emoji,
-      }))
+      return Object.keys(state.presences).map(nickname =>
+        presenceToParticipant(nickname, state.presences[nickname])
+      )
     },
-    status(state) {
-      return state.status
-    },
-    statusEmojiNative(state) {
-      return (state.status.emoji && state.status.emoji.native) || ''
+    me(state, getters) {
+      return getters.participants.find(p => p.nickname === getters.nickname)
     },
   },
   mutations: {
@@ -46,6 +51,9 @@ export default new Vuex.Store({
     setChannel(state, { channel }) {
       state.channel = channel
       state.isConnecting = false
+    },
+    setNickname(state, { nickname }) {
+      state.nickname = nickname
     },
     setPresences(state, { presences }) {
       state.presences = presences
@@ -62,6 +70,7 @@ export default new Vuex.Store({
   },
   actions: {
     connect({ commit, dispatch }, { nickname, token }) {
+      commit('setNickname', { nickname })
       commit('startConnecting')
       connectSocket({
         nickname,

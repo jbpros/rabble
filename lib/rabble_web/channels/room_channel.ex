@@ -2,6 +2,8 @@ defmodule RabbleWeb.RoomChannel do
   use Phoenix.Channel
   alias Rabble.Presence
 
+  intercept(["_reflect_emoji"])
+
   def join("room:lobby", _message, socket) do
     send(self(), :after_join)
     {:ok, socket}
@@ -17,7 +19,14 @@ defmodule RabbleWeb.RoomChannel do
   end
 
   def handle_in("set_status_emoji", %{"emoji" => emoji}, socket) do
-    Presence.update(socket, socket.assigns.nickname, %{status_emoji: emoji})
+    broadcast! socket, "_reflect_emoji", %{status_emoji: emoji, nickname: socket.assigns.nickname}
+    {:noreply, socket}
+  end
+
+  def handle_out("_reflect_emoji", msg, socket) do
+    if socket.assigns.nickname == msg.nickname do
+      Presence.update(socket, socket.assigns.nickname, %{status_emoji: msg.status_emoji})
+    end
     {:noreply, socket}
   end
 

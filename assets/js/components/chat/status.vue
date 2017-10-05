@@ -15,7 +15,11 @@ export default {
   },
   computed: {
     statusEmoji() {
-      return this.$store.getters.statusEmojiNative
+      return (
+        this.$store.getters.me &&
+        this.$store.getters.me.statusEmoji &&
+        this.$store.getters.me.statusEmoji.native
+      )
     },
   },
   methods: {
