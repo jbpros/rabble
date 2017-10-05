@@ -10,6 +10,7 @@ export default new Vuex.Store({
     isConnecting: false,
     messages: [],
     presences: {},
+    status: { emoji: null },
   },
   getters: {
     channel(state) {
@@ -25,7 +26,16 @@ export default new Vuex.Store({
       return state.messages
     },
     participants(state) {
-      return Object.keys(state.presences).map(nickname => ({ nickname }))
+      return Object.keys(state.presences).map(nickname => ({
+        nickname,
+        statusEmoji: state.presences[nickname].metas[0].status_emoji,
+      }))
+    },
+    status(state) {
+      return state.status
+    },
+    statusEmojiNative(state) {
+      return (state.status.emoji && state.status.emoji.native) || ''
     },
   },
   mutations: {
@@ -39,6 +49,9 @@ export default new Vuex.Store({
     },
     setPresences(state, { presences }) {
       state.presences = presences
+    },
+    setStatusEmoji(state, { emoji }) {
+      state.status.emoji = emoji
     },
     startConnecting(state) {
       state.isConnecting = true
@@ -64,6 +77,11 @@ export default new Vuex.Store({
     },
     sendMessage({ state }, { body }) {
       state.channel.push('new_msg', { body })
+    },
+    setStatusEmoji({ commit, state }, { emoji }) {
+      commit('setStatusEmoji', { emoji })
+      state.status.emoji = emoji
+      state.channel.push('set_status_emoji', { emoji })
     },
   },
 })

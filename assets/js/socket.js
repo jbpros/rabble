@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Chat from './components/chat.vue'
-import ConnectionStatus from './components/connection-status.vue'
 import store from './store'
 
 // When you connect, you'll often need to authenticate the client.
@@ -49,7 +48,7 @@ import store from './store'
 
 new Vue({
   el: '#main',
-  components: { Chat, ConnectionStatus },
+  components: { Chat },
   store,
 })
 

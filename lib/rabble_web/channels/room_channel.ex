@@ -16,15 +16,16 @@ defmodule RabbleWeb.RoomChannel do
     {:noreply, socket}
   end
 
-  # def handle_out("new_msg", payload, socket) do
-  #   push socket, "new_msg", payload
-  #   {:noreply, socket}
-  # end
+  def handle_in("set_status_emoji", %{"emoji" => emoji}, socket) do
+    Presence.update(socket, socket.assigns.nickname, %{status_emoji: emoji})
+    {:noreply, socket}
+  end
 
   def handle_info(:after_join, socket) do
     push socket, "presence_state", Presence.list(socket)
     {:ok, _} = Presence.track(socket, socket.assigns.nickname, %{
-      online_at: inspect(System.system_time(:seconds))
+      online_at: inspect(System.system_time(:seconds)),
+      status_emoji: ""
     })
     {:noreply, socket}
   end
