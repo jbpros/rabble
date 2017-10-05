@@ -7,8 +7,18 @@
 </template>
 
 <style scoped>
-ul { list-style: none; }
-li { display: inline; }
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+li {
+  display: inline;
+}
 </style>
 
 <script>
