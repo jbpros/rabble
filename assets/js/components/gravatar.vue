@@ -3,7 +3,9 @@
 </template>
 
 <style scope>
-img { border-radius: 80px; }
+img {
+  border-radius: 100px;
+}
 </style>
 
 <script>
@@ -21,7 +23,7 @@ export default {
       const gravatarHash = createHash('md5')
         .update(this.email)
         .digest('hex')
-      return `//www.gravatar.com/avatar/${gravatarHash}?s=80&d=mm`
+      return `//www.gravatar.com/avatar/${gravatarHash}?s=200&d=mm`
     },
   },
 }

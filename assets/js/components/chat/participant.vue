@@ -7,12 +7,14 @@
 
 <style scoped>
 #container {
-  display: inline;
+  display: inline-block;
+  position: relative;
 }
 
 span {
-  font-size: 32px;
+  font-size: 64px;
   position: absolute;
+  right: 0;
   text-shadow: -1px -1px 0px white, -1px 1px 0px white, 1px 1px 0px white, 1px -1px 0px white;
 }
 </style>
