@@ -8,10 +8,7 @@
 <script>
 export default {
   data() {
-    return {
-      email:
-        (window.location.search && window.location.search.slice(1)) || 'nobody',
-    }
+    return { email: this.$store.getters.email || '' }
   },
   methods: {
     connect: function() {

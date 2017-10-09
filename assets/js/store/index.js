@@ -14,7 +14,7 @@ export default new Vuex.Store({
     channel: null,
     isConnecting: false,
     messages: [],
-    email: '',
+    email: localStorage.getItem('rabble.email') || '',
     presences: {},
     status: { emoji: null },
   },
@@ -52,7 +52,7 @@ export default new Vuex.Store({
       state.channel = channel
       state.isConnecting = false
     },
-    setemail(state, { email }) {
+    setEmail(state, { email }) {
       state.email = email
     },
     setPresences(state, { presences }) {
@@ -70,7 +70,8 @@ export default new Vuex.Store({
   },
   actions: {
     connect({ commit, dispatch }, { email, token }) {
-      commit('setemail', { email })
+      commit('setEmail', { email })
+      localStorage.setItem('rabble.email', email)
       commit('startConnecting')
       connectSocket({
         email,
