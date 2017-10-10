@@ -54,7 +54,7 @@ module.exports = env => {
           test: /\.js$/,
           exclude: /node_modules/,
           loader: 'babel-loader',
-          include: [resolve('js'), resolve('test')],
+          include: [resolve('js'), resolve('vendor'), resolve('test')],
         },
         {
           test: /\.(gif|png|jpe?g|svg)$/i,
