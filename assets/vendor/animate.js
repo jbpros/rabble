@@ -17,8 +17,6 @@ const first = ([item]) => item;
 
 const isFunction = operand => typeof operand == "function";
 
-const duplicate = object => JSON.parse(JSON.stringify(object));
-
 
 // animation utils
 // ===============
@@ -35,14 +33,6 @@ const clearDelay = (timing, now) => {
 
 const getProgress = ({elapsed, duration}) =>
   duration > 0 ? Math.min(elapsed / duration, 1) : 1;
-
-
-// animation references
-// ====================
-
-const animations = new Set;
-
-const allElements = "body *";
 
 
 // easing equations
@@ -127,15 +117,16 @@ const extractStrings = value =>
 const extractNumbers = value =>
   String(value).match(extractRegExp).map(Number);
 
-const addPropertyKeyframes = ([property, values]) => {
+const addPropertyKeyframes = (property, values) => {
   const strings = extractStrings(first(values));
   const numbers = values.map(extractNumbers);
   const round = first(strings).startsWith("rgb");
   return {property, strings, numbers, round};
 };
 
-const createAnimationKeyframes = object =>
-  Object.entries(object).map(addPropertyKeyframes);
+const createAnimationKeyframes = (keyframes, index) =>
+  Object.entries(keyframes).map(([property, values]) =>
+    addPropertyKeyframes(property, isFunction(values) ? values(index) : values));
 
 const getCurrentValue = (from, to, easing) =>
   from + (to - from) * easing;
@@ -157,81 +148,98 @@ const reverseKeyframes = keyframes =>
   keyframes.forEach(({numbers}) => numbers.reverse());
 
 
-// exports
-// =======
+// animation tracking
+// ==================
 
-export default options => new Promise(resolve => {
+const animations = new Set;
+
+const addAnimations = (options, resolve) => {
   const {
-    elements = allElements,
-    duration = 1000,
+    elements = "body *",
     easing = "out-elastic",
+    duration = 1000,
     delay = 0,
     loop = false,
     direction = "normal",
     ...rest
   } = options;
-  const nodes = getElements(elements);
-  if (nodes.length < 1) return;
 
-  const curve = decomposeEasing(easing);
-  const keyframes = createAnimationKeyframes(rest);
-  const alternate = direction == "alternate";
-  if (direction != "normal") reverseKeyframes(keyframes);
+  let last;
+  let maxDuration = -1;
 
-  const startTick = animations.size < 1;
-  const params = nodes.map((element, index) => {
+  getElements(elements).forEach((element, index) => {
     const animation = {
       element,
-      keyframes: alternate && index ? duplicate(keyframes) : keyframes,
+      loop,
+      direction,
+      easing: decomposeEasing(easing),
       delay: isFunction(delay) ? delay(index) : delay,
-      duration: isFunction(duration) ? duration(index) : duration
+      duration: isFunction(duration) ? duration(index) : duration,
+      keyframes: createAnimationKeyframes(rest, index)
     };
+    const totalDuration = animation.delay + animation.duration;
+
+    if (direction != "normal")
+      reverseKeyframes(animation.keyframes);
+
+    if (totalDuration > maxDuration) {
+      last = animation;
+      maxDuration = totalDuration;
+    }
+
     animations.add(animation);
-    return animation;
   });
 
-  const [last] = params.sort((a, b) => (b.delay + b.duration) - (a.delay + a.duration));
   last.end = resolve;
   last.options = options;
+};
 
-  if (startTick) {
-    const tick = now => {
-      animations.forEach(animation => {
-        const {element, keyframes, end} = animation;
-        trackTime(animation, now);
 
-        if (animation.delay > 0) {
-          if (animation.elapsed < animation.delay) return;
-          clearDelay(animation, now);
-        }
+// exports
+// =======
 
-        const progress = getProgress(animation);
-        let easing = progress;
+export default options => new Promise(resolve => {
+  const running = animations.size;
+  addAnimations(options, resolve);
 
-        switch (progress) {
-          case 0:
-            if (alternate) reverseKeyframes(keyframes);
-            break;
-          case 1:
-            loop ? animation.startTime = 0 : animations.delete(animation);
-            if (end) end(animation.options);
-            break;
-          default:
-            easing = ease(curve, progress);
-        }
+  if (running) return;
 
-        const styles = createStyles(keyframes, easing);
-        Object.assign(element.style, styles);
-      });
+  const tick = now => {
+    animations.forEach(animation => {
+      const {element, keyframes, loop, direction, easing, end} = animation;
+      trackTime(animation, now);
 
-      if (animations.size) requestAnimationFrame(tick);
-    };
+      if (animation.delay > 0) {
+        if (animation.elapsed < animation.delay) return;
+        clearDelay(animation, now);
+      }
 
-    requestAnimationFrame(tick);
-  }
+      const progress = getProgress(animation);
+      let curve = progress;
+
+      switch (progress) {
+        case 0:
+          if (direction == "alternate") reverseKeyframes(keyframes);
+          break;
+        case 1:
+          loop ? animation.startTime = 0 : animations.delete(animation);
+          if (end) end(animation.options);
+          break;
+        default:
+          curve = ease(easing, progress);
+      }
+
+      const styles = createStyles(keyframes, curve);
+      Object.assign(element.style, styles);
+    });
+
+    if (animations.size) requestAnimationFrame(tick);
+  };
+
+  requestAnimationFrame(tick);
 });
 
-export const stop = (elements = allElements) => {
+export const stop = (elements = "body *") => {
   const nodes = getElements(elements);
   animations.forEach(animation => {
     if (nodes.includes(animation.element)) animations.delete(animation);
