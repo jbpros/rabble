@@ -1,5 +1,9 @@
-// DOM utils
-// =========
+// utils
+// =====
+
+const first = ([item]) => item;
+
+const isFunction = operand => typeof operand == "function";
 
 const getElements = elements => {
   if (Array.isArray(elements))
@@ -9,26 +13,9 @@ const getElements = elements => {
   return Array.from(typeof elements == "string" ? document.querySelectorAll(elements) : elements);
 };
 
-
-// logic utils
-// ===========
-
-const first = ([item]) => item;
-
-const isFunction = operand => typeof operand == "function";
-
-
-// animation utils
-// ===============
-
 const trackTime = (timing, now) => {
   if (!timing.startTime) timing.startTime = now;
   timing.elapsed = now - timing.startTime;
-};
-
-const clearDelay = (timing, now) => {
-  timing.startTime = now;
-  timing.delay = timing.elapsed = 0;
 };
 
 const getProgress = ({elapsed, duration}) =>
@@ -151,14 +138,21 @@ const reverseKeyframes = keyframes =>
 // animation tracking
 // ==================
 
-const animations = new Set;
+const rAF = {
+  all: new Set,
+  add(object) {
+    if (this.all.add(object).size < 2) tick(performance.now());
+  }
+};
+
+const paused = {};
 
 const addAnimations = (options, resolve) => {
   const {
     elements = "body *",
     easing = "out-elastic",
     duration = 1000,
-    delay = 0,
+    delay: timeout = 0,
     loop = false,
     direction = "normal",
     ...rest
@@ -167,17 +161,18 @@ const addAnimations = (options, resolve) => {
   let last;
   let maxDuration = -1;
 
-  getElements(elements).forEach((element, index) => {
+  getElements(elements).forEach(async (element, index) => {
     const animation = {
       element,
       loop,
       direction,
       easing: decomposeEasing(easing),
-      delay: isFunction(delay) ? delay(index) : delay,
       duration: isFunction(duration) ? duration(index) : duration,
       keyframes: createAnimationKeyframes(rest, index)
     };
-    const totalDuration = animation.delay + animation.duration;
+
+    const animationTimeout = isFunction(timeout) ? timeout(index) : timeout;
+    const totalDuration = animationTimeout + animation.duration;
 
     if (direction != "normal")
       reverseKeyframes(animation.keyframes);
@@ -187,43 +182,31 @@ const addAnimations = (options, resolve) => {
       maxDuration = totalDuration;
     }
 
-    animations.add(animation);
+    await delay(animationTimeout);
+    rAF.add(animation);
   });
 
   last.end = resolve;
   last.options = options;
 };
 
+const tick = now => {
+  const {all} = rAF;
+  all.forEach(object => {
+    trackTime(object, now);
+    const {element, keyframes, loop, direction, easing, end} = object;
+    const progress = getProgress(object);
 
-// exports
-// =======
-
-export default options => new Promise(resolve => {
-  const running = animations.size;
-  addAnimations(options, resolve);
-
-  if (running) return;
-
-  const tick = now => {
-    animations.forEach(animation => {
-      const {element, keyframes, loop, direction, easing, end} = animation;
-      trackTime(animation, now);
-
-      if (animation.delay > 0) {
-        if (animation.elapsed < animation.delay) return;
-        clearDelay(animation, now);
-      }
-
-      const progress = getProgress(animation);
+    // object is an animation
+    if (direction) {
       let curve = progress;
-
       switch (progress) {
         case 0:
           if (direction == "alternate") reverseKeyframes(keyframes);
           break;
         case 1:
-          loop ? animation.startTime = 0 : animations.delete(animation);
-          if (end) end(animation.options);
+          loop ? object.startTime = 0 : all.delete(object);
+          if (end) end(object.options);
           break;
         default:
           curve = ease(easing, progress);
@@ -231,18 +214,53 @@ export default options => new Promise(resolve => {
 
       const styles = createStyles(keyframes, curve);
       Object.assign(element.style, styles);
-    });
+      return;
+    }
 
-    if (animations.size) requestAnimationFrame(tick);
-  };
+    // object is a delay
+    if (progress < 1) return;
+    all.delete(object);
+    end(object.duration);
+  });
 
-  requestAnimationFrame(tick);
+  if (all.size) requestAnimationFrame(tick);
+};
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    const {all} = rAF;
+    paused.time = performance.now();
+    paused.all = new Set(all);
+    all.clear();
+    return;
+  }
+
+  const {all, time} = paused;
+  const elapsed = performance.now() - time;
+  all.forEach(object => {
+    object.startTime += elapsed;
+    rAF.add(object);
+  });
 });
 
+
+// exports
+// =======
+
+export default options =>
+  new Promise(resolve => addAnimations(options, resolve));
+
+export const delay = duration =>
+  new Promise(resolve => rAF.add({
+    duration,
+    end: resolve
+  }));
+
 export const stop = (elements = "body *") => {
+  const {all} = rAF;
   const nodes = getElements(elements);
-  animations.forEach(animation => {
-    if (nodes.includes(animation.element)) animations.delete(animation);
+  all.forEach(object => {
+    if (nodes.includes(object.element)) all.delete(object);
   });
   return nodes;
 };
