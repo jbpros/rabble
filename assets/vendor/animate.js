@@ -22,6 +22,33 @@ const getProgress = ({elapsed, duration}) =>
   duration > 0 ? Math.min(elapsed / duration, 1) : 1;
 
 
+// color conversion
+// ================
+
+const hexPairs = color => {
+  const split = color.split("");
+  const pairs = color.length < 5
+    ? split.map(string => string + string)
+    : split.reduce((array, string, index) => {
+      if (index % 2)
+        array.push(split[index - 1] + string);
+      return array;
+    }, []);
+  if (pairs.length < 4)
+    pairs.push("ff");
+  return pairs;
+};
+
+const convert = color =>
+  hexPairs(color).map(string => parseInt(string, 16));
+
+const rgba = hex => {
+  const color = hex.slice(1);
+  const [r, g, b, a] = convert(color);
+  return `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+};
+
+
 // easing equations
 // ================
 
@@ -99,14 +126,21 @@ const ease = ({easing, amplitude, period}, progress) =>
 const extractRegExp = /-?\d*\.?\d+/g;
 
 const extractStrings = value =>
-  String(value).split(extractRegExp);
+  value.split(extractRegExp);
 
 const extractNumbers = value =>
-  String(value).match(extractRegExp).map(Number);
+  value.match(extractRegExp).map(Number);
+
+const sanitize = values =>
+  values.map(value => {
+    const string = String(value);
+    return string.startsWith("#") ? rgba(string) : string;
+  });
 
 const addPropertyKeyframes = (property, values) => {
-  const strings = extractStrings(first(values));
-  const numbers = values.map(extractNumbers);
+  const animatable = sanitize(values);
+  const strings = extractStrings(first(animatable));
+  const numbers = animatable.map(extractNumbers);
   const round = first(strings).startsWith("rgb");
   return {property, strings, numbers, round};
 };
