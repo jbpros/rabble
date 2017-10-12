@@ -8,7 +8,7 @@ const isFunction = operand => typeof operand == "function";
 const getElements = elements => {
   if (Array.isArray(elements))
     return elements;
-  if (elements.nodeType)
+  if (!elements || elements.nodeType)
     return [elements];
   return Array.from(typeof elements == "string" ? document.querySelectorAll(elements) : elements);
 };
@@ -175,7 +175,7 @@ const reverseKeyframes = keyframes =>
 const rAF = {
   all: new Set,
   add(object) {
-    if (this.all.add(object).size < 2) tick(performance.now());
+    if (this.all.add(object).size < 2) requestAnimationFrame(tick);
   }
 };
 
@@ -183,12 +183,13 @@ const paused = {};
 
 const addAnimations = (options, resolve) => {
   const {
-    elements = "body *",
+    elements = null,
     easing = "out-elastic",
     duration = 1000,
     delay: timeout = 0,
     loop = false,
     direction = "normal",
+    change = null,
     ...rest
   } = options;
 
@@ -200,6 +201,7 @@ const addAnimations = (options, resolve) => {
       element,
       loop,
       direction,
+      change,
       easing: decomposeEasing(easing),
       duration: isFunction(duration) ? duration(index) : duration,
       keyframes: createAnimationKeyframes(rest, index)
@@ -216,7 +218,7 @@ const addAnimations = (options, resolve) => {
       maxDuration = totalDuration;
     }
 
-    await delay(animationTimeout);
+    if (animationTimeout) await delay(animationTimeout);
     rAF.add(animation);
   });
 
@@ -228,7 +230,7 @@ const tick = now => {
   const {all} = rAF;
   all.forEach(object => {
     trackTime(object, now);
-    const {element, keyframes, loop, direction, easing, end} = object;
+    const {element, keyframes, loop, direction, change, easing, end} = object;
     const progress = getProgress(object);
 
     // object is an animation
@@ -247,7 +249,8 @@ const tick = now => {
       }
 
       const styles = createStyles(keyframes, curve);
-      Object.assign(element.style, styles);
+      if (element) Object.assign(element.style, styles);
+      if (change) change(curve);
       return;
     }
 
@@ -290,7 +293,7 @@ export const delay = duration =>
     end: resolve
   }));
 
-export const stop = (elements = "body *") => {
+export const stop = elements => {
   const {all} = rAF;
   const nodes = getElements(elements);
   all.forEach(object => {
