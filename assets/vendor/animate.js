@@ -5,6 +5,10 @@ const first = ([item]) => item;
 
 const isFunction = operand => typeof operand == "function";
 
+
+// dom
+// ===
+
 const getElements = elements => {
   if (Array.isArray(elements))
     return elements;
@@ -13,13 +17,10 @@ const getElements = elements => {
   return Array.from(typeof elements == "string" ? document.querySelectorAll(elements) : elements);
 };
 
-const trackTime = (timing, now) => {
-  if (!timing.startTime) timing.startTime = now;
-  timing.elapsed = now - timing.startTime;
-};
-
-const getProgress = ({elapsed, duration}) =>
-  duration > 0 ? Math.min(elapsed / duration, 1) : 1;
+const accelerate = (element, keyframes) =>
+  element.style.willChange = keyframes
+    ? keyframes.map(({property}) => property).join()
+    : "auto";
 
 
 // color conversion
@@ -181,13 +182,26 @@ const rAF = {
 
 const paused = {};
 
+const trackTime = (timing, now) => {
+  if (!timing.startTime) timing.startTime = now;
+  timing.elapsed = now - timing.startTime;
+};
+
+const getProgress = ({elapsed, duration}) =>
+  duration > 0 ? Math.min(elapsed / duration, 1) : 1;
+
+const setSpeed = (speed, value, index) =>
+  speed > 0 ? (isFunction(value) ? value(index) : value) / speed : 0;
+
 const addAnimations = (options, resolve) => {
   const {
     elements = null,
     easing = "out-elastic",
     duration = 1000,
     delay: timeout = 0,
+    speed = 1,
     loop = false,
+    optimize = false,
     direction = "normal",
     change = null,
     ...rest
@@ -197,21 +211,26 @@ const addAnimations = (options, resolve) => {
   let maxDuration = -1;
 
   getElements(elements).forEach(async (element, index) => {
+    const keyframes = createAnimationKeyframes(rest, index);
     const animation = {
       element,
+      keyframes,
       loop,
+      optimize,
       direction,
       change,
       easing: decomposeEasing(easing),
-      duration: isFunction(duration) ? duration(index) : duration,
-      keyframes: createAnimationKeyframes(rest, index)
+      duration: setSpeed(speed, duration, index)
     };
 
-    const animationTimeout = isFunction(timeout) ? timeout(index) : timeout;
+    const animationTimeout = setSpeed(speed, timeout, index);
     const totalDuration = animationTimeout + animation.duration;
 
     if (direction != "normal")
-      reverseKeyframes(animation.keyframes);
+      reverseKeyframes(keyframes);
+
+    if (optimize)
+      accelerate(element, keyframes);
 
     if (totalDuration > maxDuration) {
       last = animation;
@@ -230,7 +249,7 @@ const tick = now => {
   const {all} = rAF;
   all.forEach(object => {
     trackTime(object, now);
-    const {element, keyframes, loop, direction, change, easing, end} = object;
+    const {element, keyframes, loop, optimize, direction, change, easing, end} = object;
     const progress = getProgress(object);
 
     // object is an animation
@@ -241,16 +260,20 @@ const tick = now => {
           if (direction == "alternate") reverseKeyframes(keyframes);
           break;
         case 1:
-          loop ? object.startTime = 0 : all.delete(object);
+          if (loop)
+            object.startTime = 0;
+          else {
+            all.delete(object);
+            if (optimize) accelerate(element);
+          }
           if (end) end(object.options);
           break;
         default:
           curve = ease(easing, progress);
       }
 
-      const styles = createStyles(keyframes, curve);
-      if (element) Object.assign(element.style, styles);
       if (change) change(curve);
+      if (element) Object.assign(element.style, createStyles(keyframes, curve));
       return;
     }
 
