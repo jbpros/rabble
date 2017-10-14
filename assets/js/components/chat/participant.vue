@@ -35,7 +35,7 @@ export default {
         elements: el,
         transform: ['translateY(-500px)', ' translateY(0px)'],
         easing: 'out-elastic',
-        duration: 400,
+        duration: 700,
       })
       console.log('done animating')
     },
