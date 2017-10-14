@@ -1,6 +1,6 @@
 <template>
   <div>
-    <picker v-if="pickingEmoji" title="" emoji=":cucumber:" @click="pickStatusEmoji"></picker>
+    <picker v-show="pickingEmoji" title="" emoji=":cucumber:" @click="pickStatusEmoji"></picker>
     <button @click="startPickingEmoji">{{ statusEmoji }}</button>
   </div>
 </template>
