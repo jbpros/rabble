@@ -1,6 +1,7 @@
 defmodule RabbleWeb.RoomChannel do
   use Phoenix.Channel
   alias Rabble.Presence
+  alias Rabble.Roles
 
   intercept(["_reflect_emoji"])
 
@@ -34,8 +35,10 @@ defmodule RabbleWeb.RoomChannel do
   end
 
   def handle_info(:after_join, socket) do
+    Roles.assign_role(Rabble.Roles, socket.assigns.email, "junior")
     push socket, "presence_state", Presence.list(socket)
     {:ok, _} = Presence.track(socket, socket.assigns.email, init_meta(socket))
+    push socket, "all_roles", Roles.get_roles(Roles)
     {:noreply, socket}
   end
 
