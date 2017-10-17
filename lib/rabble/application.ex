@@ -14,7 +14,9 @@ defmodule Rabble.Application do
       supervisor(RabbleWeb.Endpoint, []),
       # Start your own worker by calling: Rabble.Worker.start_link(arg1, arg2, arg3)
       # worker(Rabble.Worker, [arg1, arg2, arg3]),
-      supervisor(Rabble.Presence, [])
+      supervisor(Rabble.Presence, []),
+
+      worker(Rabble.Roles, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
