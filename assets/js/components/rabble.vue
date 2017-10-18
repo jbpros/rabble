@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="isConnected">
-      <chat></chat>
+      <room></room>
     </div>
     <div v-else>
       Not connected.
@@ -11,13 +11,13 @@
 </template>
 
 <script>
-import Chat from './chat.vue'
 import Login from './login.vue'
+import Room from './room.vue'
 
 export default {
   components: {
-    Chat,
     Login,
+    Room,
   },
   computed: {
     isConnected() {

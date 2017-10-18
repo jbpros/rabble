@@ -8,10 +8,10 @@
 </template>
 
 <script>
-import ChatInput from './chat/chat-input.vue'
-import Messages from './chat/messages.vue'
-import Participants from './chat/participants.vue'
-import Status from './chat/status.vue'
+import ChatInput from './room/chat-input.vue'
+import Messages from './room/messages.vue'
+import Participants from './room/participants.vue'
+import Status from './room/status.vue'
 
 export default {
   components: {
