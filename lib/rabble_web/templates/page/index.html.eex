@@ -1,4 +1,4 @@
 <div id="main">
   <h2>Rabble</h2>
-  <chat></chat>
+  <rabble></rabble>
 </div>

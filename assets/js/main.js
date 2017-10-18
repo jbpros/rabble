@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Chat from './components/chat.vue'
+import Rabble from './components/rabble.vue'
 import store from './store'
 
 // When you connect, you'll often need to authenticate the client.
@@ -48,7 +48,7 @@ import store from './store'
 
 new Vue({
   el: '#main',
-  components: { Chat },
+  components: { Rabble },
   store,
 })
 

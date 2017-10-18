@@ -1,2 +1,2 @@
 import 'phoenix_html'
-import socket from './socket' // eslint-disable-line no-unused-vars
+import main from './main' // eslint-disable-line no-unused-vars
