@@ -2,21 +2,18 @@
   <div>
     <participants></participants>
     <status></status>
-    <messages></messages>
-    <chat-input></chat-input>
+    <chat></chat>
   </div>
 </template>
 
 <script>
-import ChatInput from './room/chat-input.vue'
-import Messages from './room/messages.vue'
+import Chat from './chat'
 import Participants from './room/participants.vue'
 import Status from './room/status.vue'
 
 export default {
   components: {
-    ChatInput,
-    Messages,
+    Chat,
     Participants,
     Status,
   },
