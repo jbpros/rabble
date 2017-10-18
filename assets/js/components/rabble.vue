@@ -12,7 +12,7 @@
 
 <script>
 import Login from './login.vue'
-import Room from './room.vue'
+import Room from './room'
 
 export default {
   components: {

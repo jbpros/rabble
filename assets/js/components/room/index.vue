@@ -7,9 +7,9 @@
 </template>
 
 <script>
-import Chat from './chat'
-import Participants from './room/participants.vue'
-import Status from './room/status.vue'
+import Chat from '../chat'
+import Participants from './participants.vue'
+import Status from './status.vue'
 
 export default {
   components: {
