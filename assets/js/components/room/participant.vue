@@ -30,14 +30,12 @@ export default {
   components: { Gravatar },
   methods: {
     onJoin: async el => {
-      console.log('animate')
       await animate({
         elements: el,
         transform: ['translateY(-500px)', ' translateY(0px)'],
         easing: 'out-elastic',
         duration: 700,
       })
-      console.log('done animating')
     },
   },
 }
