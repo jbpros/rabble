@@ -16,6 +16,7 @@ export default new Vuex.Store({
     messages: [],
     email: localStorage.getItem('rabble.email') || '',
     presences: {},
+    roles: {},
     status: { emoji: null },
   },
   getters: {
@@ -39,11 +40,18 @@ export default new Vuex.Store({
         presenceToParticipant(email, state.presences[email])
       )
     },
+    roleAssignees(_state) {
+      // { role: email }
+      return {}
+    },
     me(state, getters) {
       return getters.participants.find(p => p.email === getters.email)
     },
   },
   mutations: {
+    assignRole(state, { role, email }) {
+      state.roles[role] = email
+    },
     failToConnect(state, { resp }) {
       state.isConnecting = false
       alert(`Failed to connect (${JSON.stringify(resp)})`)
@@ -64,26 +72,29 @@ export default new Vuex.Store({
     startConnecting(state) {
       state.isConnecting = true
     },
+    storeAllRoles(state, { roles }) {
+      state.roles = roles
+    },
     storeMessage(state, { payload }) {
       state.messages.push(payload)
     },
   },
   actions: {
-    connect({ commit, dispatch }, { email, token }) {
+    connect({ commit }, { email, token }) {
       commit('setEmail', { email })
       localStorage.setItem('rabble.email', email)
       commit('startConnecting')
       connectSocket({
         email,
         token,
+        onAllRolesReceived: ({ roles }) => commit('storeAllRoles', { roles }),
         onOk: (resp, channel) => commit('setChannel', { channel, resp }),
         onError: resp => commit('failToConnect', { resp }),
-        onMessage: payload => dispatch('receiveMessage', { payload }),
+        onMessage: payload => commit('storeMessage', { payload }),
         onPresences: ({ presences }) => commit('setPresences', { presences }),
+        onRoleAssigned: ({ role, email }) =>
+          commit('assignRole', { role, email }),
       })
-    },
-    receiveMessage({ commit }, { payload }) {
-      commit('storeMessage', { payload })
     },
     sendMessage({ state }, { body }) {
       state.channel.push('new_msg', { body })
