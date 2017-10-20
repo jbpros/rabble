@@ -1,9 +1,9 @@
 <template>
-  <ul>
-    <li v-for="participant in participants">
+  <transition-group tag="ul" @enter="onJoin" v-on:leave="onLeave" appear v-bind:css="false">
+    <li v-for="participant in participants" v-bind:key="participant.email">
       <participant :participant="participant"></participant>
     </li>
-  </ul>
+  </transition-group>
 </template>
 
 <style scoped>
@@ -23,12 +23,33 @@ li {
 
 <script>
 import Participant from './participant.vue'
+import animate from '../../../vendor/animate'
 
 export default {
   components: { Participant },
   computed: {
     participants() {
       return this.$store.getters.participants
+    },
+  },
+  methods: {
+    async onJoin(el) {
+      await animate({
+        elements: el,
+        transform: ['translateY(-500px)', 'translateY(0px)'],
+        easing: 'out-elastic',
+        duration: 700,
+      })
+    },
+
+    async onLeave(el, done) {
+      await animate({
+        elements: el,
+        transform: ['translateY(0px)', 'translateY(500px)'],
+        easing: 'in-quintic',
+        duration: 300,
+      })
+      done()
     },
   },
 }

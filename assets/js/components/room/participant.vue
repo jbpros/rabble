@@ -1,13 +1,11 @@
 <template>
-  <transition @enter="onJoin" appear v-bind:css="false">
-    <div class="container">
-      <span class="status-emoji">{{ participant.statusEmoji && participant.statusEmoji.native }}</span>
-      <ul class="roles">
-        <li class="role" v-for="role in participant.roles">{{role}}</li>
-      </ul>
-      <gravatar :email="participant.email"></gravatar>
-    </div>
-  </transition>
+  <div class="container">
+    <span class="status-emoji">{{ participant.statusEmoji && participant.statusEmoji.native }}</span>
+    <ul class="roles">
+      <li class="role" v-for="role in participant.roles">{{role}}</li>
+    </ul>
+    <gravatar :email="participant.email"></gravatar>
+  </div>
 </template>
 
 <style scoped>
@@ -46,20 +44,9 @@
 
 <script>
 import Gravatar from '../gravatar.vue'
-import animate from '../../../vendor/animate'
 
 export default {
   props: ['participant'],
   components: { Gravatar },
-  methods: {
-    onJoin: async el => {
-      await animate({
-        elements: el,
-        transform: ['translateY(-500px)', ' translateY(0px)'],
-        easing: 'out-elastic',
-        duration: 700,
-      })
-    },
-  },
 }
 </script>
