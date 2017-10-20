@@ -1,5 +1,5 @@
 <template>
-  <img :src="url" :alt="alt"></img>
+  <img :src="url" :alt="alt" :title="alt"></img>
 </template>
 
 <style scope>
@@ -12,7 +12,7 @@ img {
 import { createHash } from 'crypto'
 
 export default {
-  props: ['email'],
+  props: { email: String, size: { type: Number, default: 200 } },
   computed: {
     alt() {
       return this.email
@@ -22,7 +22,7 @@ export default {
       const gravatarHash = createHash('md5')
         .update(this.email)
         .digest('hex')
-      return `//www.gravatar.com/avatar/${gravatarHash}?s=200&d=mm`
+      return `//www.gravatar.com/avatar/${gravatarHash}?s=${this.size}&d=mm`
     },
   },
 }
