@@ -31,19 +31,31 @@ export default new Vuex.Store({
     isConnecting(state) {
       return state.isConnecting
     },
+    isKnownParticipantEmail(state, { participantEmails }) {
+      return email => participantEmails.indexOf(email) > -1
+    },
     messages(state) {
       return state.messages
     },
     email(state) {
       return state.email
     },
+    participantEmails(state) {
+      return Object.keys(state.presences).map(email => email)
+    },
     participants(state) {
       return Object.keys(state.presences).map(email =>
         presenceToParticipant(email, state.presences[email])
       )
     },
-    roleAssigneeEmails(state) {
-      return state.roles
+    roleAssigneeEmails(state, { isKnownParticipantEmail }) {
+      const rolesAssignedToKnownParticipants = Object.entries(state.roles)
+        .filter(([_role, email]) => isKnownParticipantEmail(email)) // eslint-disable-line no-unused-vars
+        .reduce(
+          (roles, [role, email]) => Object.assign({}, roles, { [role]: email }),
+          {}
+        )
+      return rolesAssignedToKnownParticipants
     },
     me(state, getters) {
       return getters.participants.find(p => p.email === getters.email)
