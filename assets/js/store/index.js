@@ -4,10 +4,14 @@ import connectSocket from '../lib/connect_socket'
 
 Vue.use(Vuex)
 
-const presenceToParticipant = (email, presence) => ({
+const presenceToParticipant = ({ email, presence, roles }) => ({
   email,
   statusEmoji: presence.metas[0].status_emoji,
+  roles,
 })
+
+const toObject = array =>
+  array.reduce((objects, [k, v]) => Object.assign({}, objects, { [k]: v }), {})
 
 export default new Vuex.Store({
   state: {
@@ -43,19 +47,29 @@ export default new Vuex.Store({
     participantEmails(state) {
       return Object.keys(state.presences).map(email => email)
     },
-    participants(state) {
+    participants(state, { participantRoles }) {
       return Object.keys(state.presences).map(email =>
-        presenceToParticipant(email, state.presences[email])
+        presenceToParticipant({
+          email,
+          presence: state.presences[email],
+          roles: participantRoles(email),
+        })
       )
     },
     roleAssigneeEmails(state, { isKnownParticipantEmail }) {
-      const rolesAssignedToKnownParticipants = Object.entries(state.roles)
-        .filter(([_role, email]) => isKnownParticipantEmail(email)) // eslint-disable-line no-unused-vars
-        .reduce(
-          (roles, [role, email]) => Object.assign({}, roles, { [role]: email }),
-          {}
+      return toObject(
+        Object.entries(state.roles).filter(([, email]) =>
+          isKnownParticipantEmail(email)
         )
-      return rolesAssignedToKnownParticipants
+      )
+    },
+    participantRoles(state) {
+      return participantEmail =>
+        Object.entries(state.roles).reduce(
+          (roles, [role, email]) =>
+            email === participantEmail ? roles.concat([role]) : roles,
+          []
+        )
     },
     me(state, getters) {
       return getters.participants.find(p => p.email === getters.email)
