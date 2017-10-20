@@ -1,6 +1,7 @@
 <template>
   <div>
     <div v-if="isConnected">
+      <logout></logout>
       <room></room>
     </div>
     <div v-else>
@@ -12,11 +13,13 @@
 
 <script>
 import Login from './login.vue'
+import Logout from './logout.vue'
 import Room from './room'
 
 export default {
   components: {
     Login,
+    Logout,
     Room,
   },
   computed: {

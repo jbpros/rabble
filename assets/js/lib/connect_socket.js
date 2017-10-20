@@ -43,6 +43,8 @@ const connectSocket = ({
     .join()
     .receive('ok', resp => onOk(resp, channel))
     .receive('error', onError)
+
+  return socket
 }
 
 export default connectSocket

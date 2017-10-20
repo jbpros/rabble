@@ -17,6 +17,7 @@ export default new Vuex.Store({
     email: localStorage.getItem('rabble.email') || '',
     presences: {},
     roles: {},
+    socket: null,
     status: { emoji: null },
   },
   getters: {
@@ -65,6 +66,9 @@ export default new Vuex.Store({
     setPresences(state, { presences }) {
       state.presences = presences
     },
+    setSocket(state, { socket }) {
+      state.socket = socket
+    },
     setStatusEmoji(state, { emoji }) {
       state.status.emoji = emoji
     },
@@ -89,7 +93,7 @@ export default new Vuex.Store({
       commit('setEmail', { email })
       localStorage.setItem('rabble.email', email)
       commit('startConnecting')
-      connectSocket({
+      const socket = connectSocket({
         email,
         token,
         onAllRolesReceived: ({ roles }) => commit('storeAllRoles', { roles }),
@@ -101,6 +105,13 @@ export default new Vuex.Store({
           commit('assignRole', { role, email }),
         onRoleUnassigned: ({ role }) => commit('unassignRole', { role }),
       })
+      commit('setSocket', { socket })
+    },
+    disconnect({ state }) {
+      state.socket.disconnect()
+      state.socket = null
+      state.channel = null
+      state.isConnecting = false
     },
     sendMessage({ state }, { body }) {
       state.channel.push('new_msg', { body })
