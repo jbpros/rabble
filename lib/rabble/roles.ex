@@ -6,6 +6,11 @@ defmodule Rabble.Roles do
     RabbleWeb.Endpoint.broadcast "room:lobby", "assign_role", %{"email" => email, "role" => role}
   end
 
+  def unassign_role(pid, role) do
+    GenServer.cast(pid, {:unassign_role, role})
+    RabbleWeb.Endpoint.broadcast "room:lobby", "unassign_role", %{"role" => role}
+  end
+
   def get_roles(pid) do
     GenServer.call(pid, {:get_roles})
   end
@@ -23,8 +28,11 @@ defmodule Rabble.Roles do
   end
 
   def handle_cast({:assign_role, email, role}, roles) do
-    IO.inspect(roles)
     {:noreply, Map.put(roles, role, email)}
+  end
+
+  def handle_cast({:unassign_role, role}, roles) do
+    {:noreply, Map.delete(roles, role)}
   end
 
   def handle_call({:get_roles}, _from, roles) do

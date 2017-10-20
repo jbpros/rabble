@@ -9,6 +9,7 @@ const connectSocket = ({
   onMessage,
   onPresences,
   onRoleAssigned,
+  onRoleUnassigned,
 }) => {
   let presences = {}
   const socket = new Socket('/socket', {
@@ -35,6 +36,8 @@ const connectSocket = ({
   channel.on('assign_role', ({ role, email }) =>
     onRoleAssigned({ role, email })
   )
+
+  channel.on('unassign_role', ({ role }) => onRoleUnassigned({ role }))
 
   channel
     .join()

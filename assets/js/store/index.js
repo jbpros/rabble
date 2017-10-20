@@ -77,6 +77,9 @@ export default new Vuex.Store({
     storeMessage(state, { payload }) {
       state.messages.push(payload)
     },
+    unassignRole(state, { role }) {
+      delete state.roles[role]
+    },
   },
   actions: {
     assignRole({ state }, { role, email }) {
@@ -96,6 +99,7 @@ export default new Vuex.Store({
         onPresences: ({ presences }) => commit('setPresences', { presences }),
         onRoleAssigned: ({ role, email }) =>
           commit('assignRole', { role, email }),
+        onRoleUnassigned: ({ role }) => commit('unassignRole', { role }),
       })
     },
     sendMessage({ state }, { body }) {
@@ -105,6 +109,9 @@ export default new Vuex.Store({
       commit('setStatusEmoji', { emoji })
       state.status.emoji = emoji
       state.channel.push('set_status_emoji', { emoji })
+    },
+    unassignRole({ state }, { role }) {
+      state.channel.push('unassign_role', { role })
     },
   },
 })

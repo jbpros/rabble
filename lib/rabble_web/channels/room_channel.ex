@@ -19,6 +19,11 @@ defmodule RabbleWeb.RoomChannel do
     {:noreply, socket}
   end
 
+  def handle_in("unassign_role", %{"role" => role}, socket) do
+    Roles.unassign_role(Rabble.Roles, role)
+    {:noreply, socket}
+  end
+
   def handle_in("new_msg", %{"body" => body}, socket) do
     broadcast! socket, "new_msg", %{body: body, email: socket.assigns.email}
     {:noreply, socket}

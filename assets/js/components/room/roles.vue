@@ -28,8 +28,9 @@ export default {
   },
   methods: {
     assignRole(role, email) {
-      this.$store.dispatch('assignRole', { role, email })
-      console.log('new role assignee', role, email)
+      typeof email === 'undefined'
+        ? this.$store.dispatch('unassignRole', { role })
+        : this.$store.dispatch('assignRole', { role, email })
     },
   },
 }
