@@ -1,7 +1,7 @@
 <template>
   <ul>
     <li v-for="message in messages">
-      <gravatar class="avatar" :email="message.email"></gravatar> <strong>{{message.email | username }}</strong>: {{ message.body }}
+      <gravatar class="avatar" :email="message.email" :size="20"></gravatar> <strong>{{message.email | username }}</strong>: {{ message.body }}
     </li>
   </ul>
 </template>

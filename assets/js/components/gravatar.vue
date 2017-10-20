@@ -1,5 +1,5 @@
 <template>
-  <img :src="url" :alt="alt" :title="alt"></img>
+  <img :src="url" :alt="alt" :title="alt" :style="{ width: `${size}px`, height: `${size}px` }"></img>
 </template>
 
 <style scope>
@@ -22,7 +22,7 @@ export default {
       const gravatarHash = createHash('md5')
         .update(this.email)
         .digest('hex')
-      return `//www.gravatar.com/avatar/${gravatarHash}?s=${this.size}&d=mm`
+      return `//www.gravatar.com/avatar/${gravatarHash}?s=${this.size * 2}&d=mm`
     },
   },
 }
