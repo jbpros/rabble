@@ -3,7 +3,7 @@
     <li v-for="role in roles">
       <span>{{role}}:</span>
       <select v-model="roleAssigneeEmails[role]" @change="assignRole(role, roleAssigneeEmails[role])">
-        <option disabled value="">Please select one</option>
+        <option :value="undefined">(nobody)</option>
         <option v-for="participant in participants">{{ participant.email }}</option>
       </select>
     </li>
@@ -15,7 +15,7 @@ import Participant from './participant.vue'
 
 export default {
   data() {
-    return { roles: ['driver', 'navigator'] }
+    return { roles: ['driver', 'navigator', 'researcher'] }
   },
   components: { Participant },
   computed: {
