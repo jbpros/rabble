@@ -27,5 +27,8 @@ export default {
       return this.$store.getters.isConnected
     },
   },
+  created() {
+    this.$store.dispatch('autoConnect')
+  },
 }
 </script>

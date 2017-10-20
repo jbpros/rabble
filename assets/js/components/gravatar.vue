@@ -19,7 +19,6 @@ export default {
     },
 
     url() {
-      console.log(this.email)
       const gravatarHash = createHash('md5')
         .update(this.email)
         .digest('hex')

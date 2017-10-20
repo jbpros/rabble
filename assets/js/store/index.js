@@ -19,6 +19,7 @@ export default new Vuex.Store({
     roles: {},
     socket: null,
     status: { emoji: null },
+    token: window.userToken,
   },
   getters: {
     channel(state) {
@@ -89,9 +90,16 @@ export default new Vuex.Store({
     assignRole({ state }, { role, email }) {
       state.channel.push('assign_role', { role, email })
     },
-    connect({ commit }, { email, token }) {
+    autoConnect({ dispatch, state: { email } }) {
+      const shouldAutoconnect =
+        localStorage.getItem('rabble.autoconnect') === 'true'
+      if (shouldAutoconnect && email !== '')
+        dispatch('connect', { email, token: '?' })
+    },
+    connect({ commit, state: { token } }, { email }) {
       commit('setEmail', { email })
       localStorage.setItem('rabble.email', email)
+      localStorage.setItem('rabble.autoconnect', true)
       commit('startConnecting')
       const socket = connectSocket({
         email,
@@ -112,6 +120,7 @@ export default new Vuex.Store({
       state.socket = null
       state.channel = null
       state.isConnecting = false
+      localStorage.setItem('rabble.autoconnect', false)
     },
     sendMessage({ state }, { body }) {
       state.channel.push('new_msg', { body })

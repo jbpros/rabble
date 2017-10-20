@@ -13,7 +13,6 @@ export default {
   methods: {
     connect: function() {
       this.$store.dispatch('connect', {
-        token: window.userToken,
         email: this.email,
       })
     },
