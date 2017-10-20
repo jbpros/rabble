@@ -2,7 +2,7 @@
   <ul>
     <li v-for="role in roles">
       <span>{{role}}:</span>
-      <select v-model="roleAssignees[role]">
+      <select v-model="roleAssigneeEmails[role]" @change="assignRole(role, roleAssigneeEmails[role])">
         <option disabled value="">Please select one</option>
         <option v-for="participant in participants">{{ participant.email }}</option>
       </select>
@@ -22,8 +22,14 @@ export default {
     participants() {
       return this.$store.getters.participants
     },
-    roleAssignees() {
-      return this.$store.getters.roleAssignees
+    roleAssigneeEmails() {
+      return this.$store.getters.roleAssigneeEmails
+    },
+  },
+  methods: {
+    assignRole(role, email) {
+      this.$store.dispatch('assignRole', { role, email })
+      console.log('new role assignee', role, email)
     },
   },
 }

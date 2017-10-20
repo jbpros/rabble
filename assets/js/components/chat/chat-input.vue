@@ -13,7 +13,7 @@ export default {
     }
   },
   methods: {
-    send: function() {
+    send() {
       this.$store.dispatch('sendMessage', { body: this.text })
       this.text = ''
     },

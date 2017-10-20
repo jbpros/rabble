@@ -40,9 +40,8 @@ export default new Vuex.Store({
         presenceToParticipant(email, state.presences[email])
       )
     },
-    roleAssignees(_state) {
-      // { role: email }
-      return {}
+    roleAssigneeEmails(state) {
+      return state.roles
     },
     me(state, getters) {
       return getters.participants.find(p => p.email === getters.email)
@@ -80,6 +79,9 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    assignRole({ state }, { role, email }) {
+      state.channel.push('assign_role', { role, email })
+    },
     connect({ commit }, { email, token }) {
       commit('setEmail', { email })
       localStorage.setItem('rabble.email', email)
