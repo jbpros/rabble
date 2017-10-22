@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import connectSocket from '../lib/connect_socket'
+import toObject from '../lib/to_object'
 
 Vue.use(Vuex)
 
@@ -9,9 +10,6 @@ const presenceToParticipant = ({ email, presence, roles }) => ({
   statusEmoji: presence.metas[0].status_emoji,
   roles,
 })
-
-const toObject = array =>
-  array.reduce((objects, [k, v]) => Object.assign({}, objects, { [k]: v }), {})
 
 export default new Vuex.Store({
   state: {
