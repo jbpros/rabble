@@ -5,12 +5,6 @@ import toObject from '../lib/to_object'
 
 Vue.use(Vuex)
 
-const presenceToParticipant = ({ email, presence, roles }) => ({
-  email,
-  statusEmoji: presence.metas[0].status_emoji,
-  roles,
-})
-
 export default new Vuex.Store({
   state: {
     channel: null,
@@ -23,6 +17,7 @@ export default new Vuex.Store({
     status: { emoji: null },
     token: window.userToken,
   },
+
   getters: {
     channel: state => state.channel,
 
@@ -44,13 +39,11 @@ export default new Vuex.Store({
       Object.keys(state.presences).map(email => email),
 
     participants: (state, { participantRoles }) =>
-      Object.keys(state.presences).map(email =>
-        presenceToParticipant({
-          email,
-          presence: state.presences[email],
-          roles: participantRoles(email),
-        })
-      ),
+      Object.entries(state.presences).map(([email, presence]) => ({
+        email,
+        statusEmoji: presence.metas[0].status_emoji,
+        roles: participantRoles(email),
+      })),
 
     participantRoles: state => participantEmail =>
       Object.entries(state.roles).reduce(
@@ -66,6 +59,7 @@ export default new Vuex.Store({
         )
       ),
   },
+
   mutations: {
     assignRole: (state, { role, email }) => Vue.set(state.roles, role, email),
 
