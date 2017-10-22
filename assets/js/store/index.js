@@ -26,103 +26,88 @@ export default new Vuex.Store({
     token: window.userToken,
   },
   getters: {
-    channel(state) {
-      return state.channel
-    },
-    isConnected(state) {
-      return !!state.channel
-    },
-    isConnecting(state) {
-      return state.isConnecting
-    },
-    isKnownParticipantEmail(state, { participantEmails }) {
-      return email => participantEmails.indexOf(email) > -1
-    },
-    messages(state) {
-      return state.messages
-    },
-    email(state) {
-      return state.email
-    },
-    participantEmails(state) {
-      return Object.keys(state.presences).map(email => email)
-    },
-    participants(state, { participantRoles }) {
-      return Object.keys(state.presences).map(email =>
+    channel: state => state.channel,
+
+    email: state => state.email,
+
+    isConnected: state => !!state.channel,
+
+    isConnecting: state => state.isConnecting,
+
+    isKnownParticipantEmail: (state, { participantEmails }) => email =>
+      participantEmails.indexOf(email) > -1,
+
+    me: (state, getters) =>
+      getters.participants.find(p => p.email === getters.email),
+
+    messages: state => state.messages,
+
+    participantEmails: state =>
+      Object.keys(state.presences).map(email => email),
+
+    participants: (state, { participantRoles }) =>
+      Object.keys(state.presences).map(email =>
         presenceToParticipant({
           email,
           presence: state.presences[email],
           roles: participantRoles(email),
         })
-      )
-    },
-    participantRoles(state) {
-      return participantEmail =>
-        Object.entries(state.roles).reduce(
-          (roles, [role, email]) =>
-            email === participantEmail ? roles.concat([role]) : roles,
-          []
-        )
-    },
-    roleAssigneeEmails(state, { isKnownParticipantEmail }) {
-      return toObject(
+      ),
+
+    participantRoles: state => participantEmail =>
+      Object.entries(state.roles).reduce(
+        (roles, [role, email]) =>
+          email === participantEmail ? roles.concat([role]) : roles,
+        []
+      ),
+
+    roleAssigneeEmails: (state, { isKnownParticipantEmail }) =>
+      toObject(
         Object.entries(state.roles).filter(([, email]) =>
           isKnownParticipantEmail(email)
         )
-      )
-    },
-    me(state, getters) {
-      return getters.participants.find(p => p.email === getters.email)
-    },
+      ),
   },
   mutations: {
-    assignRole(state, { role, email }) {
-      Vue.set(state.roles, role, email)
-    },
-    failToConnect(state, { resp }) {
+    assignRole: (state, { role, email }) => Vue.set(state.roles, role, email),
+
+    failToConnect: (state, { resp }) => {
       state.isConnecting = false
       alert(`Failed to connect (${JSON.stringify(resp)})`)
     },
-    setChannel(state, { channel }) {
+
+    setChannel: (state, { channel }) => {
       state.channel = channel
       state.isConnecting = false
     },
-    setEmail(state, { email }) {
-      state.email = email
-    },
-    setPresences(state, { presences }) {
-      state.presences = presences
-    },
-    setSocket(state, { socket }) {
-      state.socket = socket
-    },
-    setStatusEmoji(state, { emoji }) {
-      state.status.emoji = emoji
-    },
-    startConnecting(state) {
-      state.isConnecting = true
-    },
-    storeAllRoles(state, { roles }) {
-      state.roles = roles
-    },
-    storeMessage(state, { payload }) {
-      state.messages.push(payload)
-    },
-    unassignRole(state, { role }) {
-      Vue.delete(state.roles, role)
-    },
+
+    setEmail: (state, { email }) => (state.email = email),
+
+    setPresences: (state, { presences }) => (state.presences = presences),
+
+    setSocket: (state, { socket }) => (state.socket = socket),
+
+    setStatusEmoji: (state, { emoji }) => (state.status.emoji = emoji),
+
+    startConnecting: state => (state.isConnecting = true),
+
+    storeAllRoles: (state, { roles }) => (state.roles = roles),
+
+    storeMessage: (state, { payload }) => state.messages.push(payload),
+
+    unassignRole: (state, { role }) => Vue.delete(state.roles, role),
   },
+
   actions: {
-    assignRole({ state }, { role, email }) {
-      state.channel.push('assign_role', { role, email })
-    },
-    autoConnect({ dispatch, state: { email } }) {
-      const shouldAutoconnect =
-        localStorage.getItem('rabble.autoconnect') === 'true'
-      if (shouldAutoconnect && email !== '')
-        dispatch('connect', { email, token: '?' })
-    },
-    connect({ commit, state: { token } }, { email }) {
+    assignRole: ({ state }, { role, email }) =>
+      state.channel.push('assign_role', { role, email }),
+
+    autoConnect: ({ dispatch, state: { email } }) =>
+      localStorage.getItem('rabble.autoconnect') === 'true' && email !== ''
+        ? dispatch('connect', { email, token: '?' })
+        : null,
+
+    connect: ({ commit, state: { token } }, { email }) => {
       commit('setEmail', { email })
       localStorage.setItem('rabble.email', email)
       localStorage.setItem('rabble.autoconnect', true)
@@ -141,23 +126,25 @@ export default new Vuex.Store({
       })
       commit('setSocket', { socket })
     },
-    disconnect({ state }) {
+
+    disconnect: ({ state }) => {
       state.socket.disconnect()
       state.socket = null
       state.channel = null
       state.isConnecting = false
       localStorage.setItem('rabble.autoconnect', false)
     },
-    sendMessage({ state }, { body }) {
-      state.channel.push('new_msg', { body })
-    },
-    setStatusEmoji({ commit, state }, { emoji }) {
+
+    sendMessage: ({ state }, { body }) =>
+      state.channel.push('new_msg', { body }),
+
+    setStatusEmoji: ({ commit, state }, { emoji }) => {
       commit('setStatusEmoji', { emoji })
       state.status.emoji = emoji
       state.channel.push('set_status_emoji', { emoji })
     },
-    unassignRole({ state }, { role }) {
-      state.channel.push('unassign_role', { role })
-    },
+
+    unassignRole: ({ state }, { role }) =>
+      state.channel.push('unassign_role', { role }),
   },
 })
