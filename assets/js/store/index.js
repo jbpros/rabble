@@ -56,13 +56,6 @@ export default new Vuex.Store({
         })
       )
     },
-    roleAssigneeEmails(state, { isKnownParticipantEmail }) {
-      return toObject(
-        Object.entries(state.roles).filter(([, email]) =>
-          isKnownParticipantEmail(email)
-        )
-      )
-    },
     participantRoles(state) {
       return participantEmail =>
         Object.entries(state.roles).reduce(
@@ -71,13 +64,20 @@ export default new Vuex.Store({
           []
         )
     },
+    roleAssigneeEmails(state, { isKnownParticipantEmail }) {
+      return toObject(
+        Object.entries(state.roles).filter(([, email]) =>
+          isKnownParticipantEmail(email)
+        )
+      )
+    },
     me(state, getters) {
       return getters.participants.find(p => p.email === getters.email)
     },
   },
   mutations: {
     assignRole(state, { role, email }) {
-      state.roles[role] = email
+      Vue.set(state.roles, role, email)
     },
     failToConnect(state, { resp }) {
       state.isConnecting = false
@@ -109,7 +109,7 @@ export default new Vuex.Store({
       state.messages.push(payload)
     },
     unassignRole(state, { role }) {
-      delete state.roles[role]
+      Vue.delete(state.roles, role)
     },
   },
   actions: {
