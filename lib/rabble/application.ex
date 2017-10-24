@@ -16,7 +16,8 @@ defmodule Rabble.Application do
       # worker(Rabble.Worker, [arg1, arg2, arg3]),
       supervisor(Rabble.Presence, []),
 
-      worker(Rabble.Roles, [])
+      worker(Rabble.Roles, []),
+      worker(Rabble.Timer, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

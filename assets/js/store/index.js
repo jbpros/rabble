@@ -8,18 +8,21 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     channel: null,
+    email: localStorage.getItem('rabble.email') || '',
     isConnecting: false,
     messages: [],
-    email: localStorage.getItem('rabble.email') || '',
     presences: {},
     roles: {},
     socket: null,
     status: { emoji: null },
+    timer: null,
     token: window.userToken,
   },
 
   getters: {
     channel: state => state.channel,
+
+    timer: state => state.timer,
 
     email: state => state.email,
 
@@ -73,6 +76,10 @@ export default new Vuex.Store({
       state.isConnecting = false
     },
 
+    setTimer: (state, timer) => {
+      state.timer = timer
+    },
+
     setEmail: (state, { email }) => (state.email = email),
 
     setPresences: (state, { presences }) => (state.presences = presences),
@@ -108,6 +115,7 @@ export default new Vuex.Store({
         email,
         token,
         onAllRolesReceived: ({ roles }) => commit('storeAllRoles', { roles }),
+        onTimerReceived: timer => commit('setTimer', timer),
         onOk: (resp, channel) => commit('setChannel', { channel, resp }),
         onError: resp => commit('failToConnect', { resp }),
         onMessage: payload => commit('storeMessage', { payload }),
@@ -135,6 +143,9 @@ export default new Vuex.Store({
       state.status.emoji = emoji
       state.channel.push('set_status_emoji', { emoji })
     },
+
+    startTimer: ({ state }, { durationSeconds }) =>
+      state.channel.push('start_timer', { duration_seconds: durationSeconds }),
 
     unassignRole: ({ state }, { role }) =>
       state.channel.push('unassign_role', { role }),

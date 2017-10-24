@@ -2,6 +2,7 @@ defmodule RabbleWeb.RoomChannel do
   use Phoenix.Channel
   alias Rabble.Presence
   alias Rabble.Roles
+  alias Rabble.Timer
 
   intercept(["_reflect_emoji"])
 
@@ -34,6 +35,11 @@ defmodule RabbleWeb.RoomChannel do
     {:noreply, socket}
   end
 
+  def handle_in("start_timer", %{"duration_seconds" => duration_seconds}, socket) do
+    Rabble.Timer.start_timer(Rabble.Timer, duration_seconds)
+    {:noreply, socket}
+  end
+
   def handle_out("_reflect_emoji", msg, socket) do
     if socket.assigns.email == msg.email do
       current_meta = get_presence_meta(socket)
@@ -45,10 +51,11 @@ defmodule RabbleWeb.RoomChannel do
   end
 
   def handle_info(:after_join, socket) do
-    Roles.assign_role(Rabble.Roles, socket.assigns.email, "junior")
+    Roles.assign_role(Rabble.Roles, socket.assigns.email, "newcomer")
     push socket, "presence_state", Presence.list(socket)
     {:ok, _} = Presence.track(socket, socket.assigns.email, init_meta(socket))
     push socket, "all_roles", Roles.get_roles(Roles)
+    push socket, "timer_running", Timer.get_current_timer(Timer)
     {:noreply, socket}
   end
 

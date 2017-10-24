@@ -4,6 +4,7 @@ const connectSocket = ({
   email,
   token,
   onAllRolesReceived,
+  onTimerReceived,
   onOk,
   onError,
   onMessage,
@@ -38,6 +39,10 @@ const connectSocket = ({
   )
 
   channel.on('unassign_role', ({ role }) => onRoleUnassigned({ role }))
+
+  channel.on('timer_running', ({ end_time: endTime }) =>
+    onTimerReceived({ endTime: new Date(endTime) })
+  )
 
   channel
     .join()
