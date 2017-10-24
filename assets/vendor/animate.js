@@ -1,4 +1,4 @@
-// utils
+// logic
 // =====
 
 const first = ([item]) => item;
@@ -69,7 +69,7 @@ const easings = {
   "in-elastic": (progress, amplitude, period) => {
     const strength = Math.max(amplitude, 1);
     const offset = getOffset(strength, period);
-		return -(strength * 2 ** (10 * (progress -= 1)) * Math.sin((progress - offset) * pi2 / period));
+    return -(strength * 2 ** (10 * (progress -= 1)) * Math.sin((progress - offset) * pi2 / period));
   },
 
   "out-cubic": progress => --progress ** 3 + 1,
@@ -106,9 +106,9 @@ const easings = {
   "in-out-elastic": (progress, amplitude, period) => {
     const strength = Math.max(amplitude, 1);
     const offset = getOffset(strength, period);
-		return (progress *= 2) < 1
-			? -.5 * (strength * 2 ** (10 * (progress -= 1)) * Math.sin((progress - offset) * pi2 / period))
-			: strength * 2 ** (-10 * (progress -= 1)) * Math.sin((progress - offset) * pi2 / period) * .5 + 1;
+    return (progress *= 2) < 1
+      ? -.5 * (strength * 2 ** (10 * (progress -= 1)) * Math.sin((progress - offset) * pi2 / period))
+      : strength * 2 ** (-10 * (progress -= 1)) * Math.sin((progress - offset) * pi2 / period) * .5 + 1;
   }
 };
 
@@ -187,6 +187,9 @@ const trackTime = (timing, now) => {
   timing.elapsed = now - timing.startTime;
 };
 
+const resetTime = object =>
+  object.startTime = 0;
+
 const getProgress = ({elapsed, duration}) =>
   duration > 0 ? Math.min(elapsed / duration, 1) : 1;
 
@@ -207,8 +210,9 @@ const addAnimations = (options, resolve) => {
     ...rest
   } = options;
 
-  let last;
-  let maxDuration = -1;
+  const last = {
+    totalDuration: -1
+  };
 
   getElements(elements).forEach(async (element, index) => {
     const keyframes = createAnimationKeyframes(rest, index);
@@ -232,17 +236,19 @@ const addAnimations = (options, resolve) => {
     if (optimize)
       accelerate(element, keyframes);
 
-    if (totalDuration > maxDuration) {
-      last = animation;
-      maxDuration = totalDuration;
+    if (totalDuration > last.totalDuration) {
+      last.animation = animation;
+      last.totalDuration = totalDuration;
     }
 
     if (animationTimeout) await delay(animationTimeout);
     rAF.add(animation);
   });
 
-  last.end = resolve;
-  last.options = options;
+  const {animation} = last;
+  if (!animation) return;
+  animation.end = resolve;
+  animation.options = options;
 };
 
 const tick = now => {
@@ -261,7 +267,7 @@ const tick = now => {
           break;
         case 1:
           if (loop)
-            object.startTime = 0;
+            resetTime(object);
           else {
             all.delete(object);
             if (optimize) accelerate(element);
@@ -272,7 +278,7 @@ const tick = now => {
           curve = ease(easing, progress);
       }
 
-      if (change) change(curve);
+      if (change && end) change(curve);
       if (element) Object.assign(element.style, createStyles(keyframes, curve));
       return;
     }
@@ -287,20 +293,23 @@ const tick = now => {
 };
 
 document.addEventListener("visibilitychange", () => {
+  const now = performance.now();
+
   if (document.hidden) {
     const {all} = rAF;
-    paused.time = performance.now();
+    paused.time = now;
     paused.all = new Set(all);
     all.clear();
     return;
   }
 
   const {all, time} = paused;
-  const elapsed = performance.now() - time;
-  all.forEach(object => {
-    object.startTime += elapsed;
-    rAF.add(object);
-  });
+  const elapsed = now - time;
+  requestAnimationFrame(() =>
+    all.forEach(object => {
+      object.startTime += elapsed;
+      rAF.add(object);
+    }));
 });
 
 
