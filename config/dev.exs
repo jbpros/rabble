@@ -40,7 +40,8 @@ config :rabble, RabbleWeb.Endpoint,
       ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
       ~r{priv/gettext/.*(po)$},
       ~r{lib/rabble_web/views/.*(ex)$},
-      ~r{lib/rabble_web/templates/.*(eex)$}
+      ~r{lib/rabble_web/templates/.*(eex)$},
+      ~r{lib/rabble/.*(ex)$},
     ]
   ]
 
