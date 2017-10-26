@@ -14,7 +14,7 @@ export default {
   },
   components: {},
   created() {
-    setInterval(this.update, 300)
+    this.update()
   },
   methods: {
     start() {
@@ -22,10 +22,15 @@ export default {
     },
 
     update() {
-      this.remainingSeconds =
-        ((this.$store.getters.timer &&
-          this.$store.getters.timer.endTime.valueOf() - Date.now().valueOf()) ||
-          0) / 1000
+      if (!this.$store.getters.timer) {
+        this.remainingSeconds = 0
+      } else {
+        const endTime = this.$store.getters.timer.endTime.valueOf()
+        const now = Date.now().valueOf()
+        if (now > endTime) this.remainingSeconds = 0
+        else this.remainingSeconds = (endTime - now || 0) / 1000
+      }
+      requestAnimationFrame(this.update)
     },
   },
 }
