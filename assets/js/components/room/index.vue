@@ -2,9 +2,9 @@
   <div>
     <participants></participants>
     <roles></roles>
+    <timer></timer>
     <status></status>
     <chat></chat>
-    <timer></timer>
   </div>
 </template>
 
