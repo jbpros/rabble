@@ -19,7 +19,7 @@ defmodule Rabble.Timer do
     {:ok, %{}}
   end
 
-  def handle_cast({:start_timer, end_time}, timer) do
+  def handle_cast({:start_timer, end_time}, _timer) do
     {:noreply, %{ end_time: end_time }}
   end
 
