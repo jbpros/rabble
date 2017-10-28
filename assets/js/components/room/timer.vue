@@ -6,6 +6,7 @@
     <button v-on:click="start(900)">15m</button>
     <button v-on:click="start(1200)">20m</button>
     <button v-on:click="adjust(-30)">-30s</button>
+    <button v-on:click="stop()">0</button>
     <button v-on:click="adjust(30)">+30s</button>
   </div>
 </template>
@@ -31,6 +32,10 @@ export default {
   methods: {
     start(seconds) {
       this.$store.dispatch('startTimer', { durationSeconds: seconds })
+    },
+
+    stop() {
+      this.$store.dispatch('startTimer', { durationSeconds: 0 })
     },
 
     adjust(seconds) {
