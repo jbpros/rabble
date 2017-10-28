@@ -52,4 +52,6 @@ new Vue({
   store,
 })
 
+if (Notification.permission !== 'granted') Notification.requestPermission()
+
 export default {}

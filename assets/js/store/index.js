@@ -82,7 +82,21 @@ export default new Vuex.Store({
 
     setEmail: (state, { email }) => (state.email = email),
 
-    setPresences: (state, { presences }) => (state.presences = presences),
+    setPresences: (state, { presences }) => {
+      const previousEmails = Object.keys(state.presences).map(email => email)
+      const currentEmails = Object.keys(presences).map(email => email)
+      const goneEmails = previousEmails.filter(
+        email => email !== state.email && currentEmails.indexOf(email) === -1
+      )
+      const newEmails = currentEmails.filter(
+        email => email !== state.email && previousEmails.indexOf(email) === -1
+      )
+      for (const email of goneEmails)
+        new Notification('Rabble', { body: `${email} has left` })
+      for (const email of newEmails)
+        new Notification('Rabble', { body: `${email} has joined` })
+      state.presences = presences
+    },
 
     setSocket: (state, { socket }) => (state.socket = socket),
 
