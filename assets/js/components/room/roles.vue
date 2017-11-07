@@ -15,7 +15,9 @@ import Participant from './participant.vue'
 
 export default {
   data() {
-    return { roles: ['driver', 'navigator', 'researcher'] }
+    return {
+      roles: ['navigator', 'driver', 'facilitator', 'scout', 'housekeeper'],
+    }
   },
   components: { Participant },
   computed: {
