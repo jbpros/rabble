@@ -36,6 +36,8 @@ export default new Vuex.Store({
     me: (state, getters) =>
       getters.participants.find(p => p.email === getters.email),
 
+    amDistracted: (state, getters) => getters.me && getters.me.distracted,
+
     messages: state => state.messages,
 
     participantEmails: state =>
@@ -45,6 +47,7 @@ export default new Vuex.Store({
       Object.entries(state.presences).map(([email, presence]) => ({
         email,
         statusEmoji: presence.metas[0].status_emoji,
+        distracted: presence.metas[0].distracted,
         roles: participantRoles(email),
       })),
 
@@ -148,6 +151,9 @@ export default new Vuex.Store({
       state.isConnecting = false
       localStorage.setItem('rabble.autoconnect', false)
     },
+
+    setAttention: ({ state }, { distracted }) =>
+      state.channel.push('set_attention', { distracted }),
 
     sendMessage: ({ state }, { body }) =>
       state.channel.push('new_msg', { body }),

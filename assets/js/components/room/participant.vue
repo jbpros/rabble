@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <span class="status-emoji">{{ participant.statusEmoji && participant.statusEmoji.native }}</span>
+  <div class="container" v-bind:class="{ distracted: participant.distracted }">
+    <span class="status-emoji" >{{ participant.statusEmoji && participant.statusEmoji.native }}</span>
     <ul class="roles">
       <li class="role" v-for="role in participant.roles">{{role}}</li>
     </ul>
@@ -39,6 +39,11 @@
   background: rgba(255,255,255,.8);
   border-radius: 4px;
   border: solid 1px rgba(0,0,0,.1)
+}
+
+.distracted {
+  opacity: .4;
+  filter: grayscale(100%);
 }
 </style>
 

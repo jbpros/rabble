@@ -2,6 +2,7 @@
   <div>
     <picker v-show="pickingEmoji" title="" emoji=":cucumber:" @click="pickStatusEmoji"></picker>
     <button @click="startPickingEmoji">{{ statusEmoji }}</button>
+    <button @click="toggleAttention">{{ attention }}</button>
   </div>
 </template>
 
@@ -14,6 +15,9 @@ export default {
     return { pickingEmoji: false }
   },
   computed: {
+    attention() {
+      return this.$store.getters.amDistracted ? 'distracted' : 'attentive'
+    },
     statusEmoji() {
       return (
         this.$store.getters.me &&
@@ -29,6 +33,11 @@ export default {
     },
     startPickingEmoji() {
       this.pickingEmoji = !this.pickingEmoji
+    },
+    toggleAttention() {
+      this.$store.dispatch('setAttention', {
+        distracted: !this.$store.getters.amDistracted,
+      })
     },
   },
 }

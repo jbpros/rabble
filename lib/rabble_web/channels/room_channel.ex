@@ -4,7 +4,7 @@ defmodule RabbleWeb.RoomChannel do
   alias Rabble.Roles
   alias Rabble.Timer
 
-  intercept(["_reflect_emoji"])
+  intercept(["_reflect_emoji", "_reflect_attention"])
 
   def join("room:lobby", _message, socket) do
     send(self(), :after_join)
@@ -35,6 +35,11 @@ defmodule RabbleWeb.RoomChannel do
     {:noreply, socket}
   end
 
+  def handle_in("set_attention", %{"distracted" => distracted}, socket) do
+    broadcast! socket, "_reflect_attention", %{distracted: distracted, email: socket.assigns.email}
+    {:noreply, socket}
+  end
+
   def handle_in("start_timer", %{"duration_seconds" => duration_seconds}, socket) do
     Rabble.Timer.start_timer(Rabble.Timer, duration_seconds)
     {:noreply, socket}
@@ -45,6 +50,16 @@ defmodule RabbleWeb.RoomChannel do
       current_meta = get_presence_meta(socket)
       Presence.update(socket, socket.assigns.email, %{ current_meta |
         status_emoji: msg.status_emoji
+      })
+    end
+    {:noreply, socket}
+  end
+
+  def handle_out("_reflect_attention", msg, socket) do
+    if socket.assigns.email == msg.email do
+      current_meta = get_presence_meta(socket)
+      Presence.update(socket, socket.assigns.email, %{ current_meta |
+        distracted: msg.distracted
       })
     end
     {:noreply, socket}
@@ -63,7 +78,8 @@ defmodule RabbleWeb.RoomChannel do
     %{
       channel_pid: inspect(socket.channel_pid),
       online_at: socket.assigns.online_at,
-      status_emoji: %{native: "🕶"} # TODO: nil
+      status_emoji: %{native: "🕶"}, # TODO: nil
+      distracted: false
     }
   end
 
