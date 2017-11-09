@@ -166,7 +166,9 @@ export default new Vuex.Store({
       )
 
       const newlyFocussedParticipantEmails = previouslyDistractedParticipantEmails.filter(
-        email => getters.distractedParticipantEmails.indexOf(email) === -1
+        email =>
+          getters.distractedParticipantEmails.indexOf(email) === -1 &&
+          getters.participantEmails.indexOf(email) > -1
       )
 
       for (const email of newlyDistractedParticipantEmails)
