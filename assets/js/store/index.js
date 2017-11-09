@@ -58,6 +58,9 @@ export default new Vuex.Store({
         []
       ),
 
+    distractedParticipantEmails: (state, { participants }) =>
+      participants.filter(p => p.distracted).map(p => p.email),
+
     roleAssigneeEmails: (state, { isKnownParticipantEmail }) =>
       toObject(
         Object.entries(state.roles).filter(([, email]) =>
@@ -85,21 +88,7 @@ export default new Vuex.Store({
 
     setEmail: (state, { email }) => (state.email = email),
 
-    setPresences: (state, { presences }) => {
-      const previousEmails = Object.keys(state.presences).map(email => email)
-      const currentEmails = Object.keys(presences).map(email => email)
-      const goneEmails = previousEmails.filter(
-        email => email !== state.email && currentEmails.indexOf(email) === -1
-      )
-      const newEmails = currentEmails.filter(
-        email => email !== state.email && previousEmails.indexOf(email) === -1
-      )
-      for (const email of goneEmails)
-        new Notification('Rabble', { body: `${email} has left` })
-      for (const email of newEmails)
-        new Notification('Rabble', { body: `${email} has joined` })
-      state.presences = presences
-    },
+    setPresences: (state, { presences }) => (state.presences = presences),
 
     setSocket: (state, { socket }) => (state.socket = socket),
 
@@ -123,7 +112,7 @@ export default new Vuex.Store({
         ? dispatch('connect', { email, token: '?' })
         : null,
 
-    connect: ({ commit, state: { token } }, { email }) => {
+    connect: ({ commit, dispatch, state: { token } }, { email }) => {
       commit('setEmail', { email })
       localStorage.setItem('rabble.email', email)
       localStorage.setItem('rabble.autoconnect', true)
@@ -136,7 +125,8 @@ export default new Vuex.Store({
         onOk: (resp, channel) => commit('setChannel', { channel, resp }),
         onError: resp => commit('failToConnect', { resp }),
         onMessage: payload => commit('storeMessage', { payload }),
-        onPresences: ({ presences }) => commit('setPresences', { presences }),
+        onPresences: ({ presences: newPresences }) =>
+          dispatch('receivePresences', { newPresences }),
         onRoleAssigned: ({ role, email }) =>
           commit('assignRole', { role, email }),
         onRoleUnassigned: ({ role }) => commit('unassignRole', { role }),
@@ -150,6 +140,44 @@ export default new Vuex.Store({
       state.channel = null
       state.isConnecting = false
       localStorage.setItem('rabble.autoconnect', false)
+    },
+
+    receivePresences: ({ commit, state, getters }, { newPresences }) => {
+      const previousEmails = Object.keys(state.presences).map(email => email)
+      const currentEmails = Object.keys(newPresences).map(email => email)
+      const goneEmails = previousEmails.filter(
+        email => email !== state.email && currentEmails.indexOf(email) === -1
+      )
+      const newEmails = currentEmails.filter(
+        email => email !== state.email && previousEmails.indexOf(email) === -1
+      )
+      for (const email of goneEmails)
+        if (email !== getters.email)
+          new Notification('Rabble', { body: `${email} has left` })
+      for (const email of newEmails)
+        if (email !== getters.email)
+          new Notification('Rabble', { body: `${email} has joined` })
+
+      const previouslyDistractedParticipantEmails =
+        getters.distractedParticipantEmails
+      commit('setPresences', { presences: newPresences })
+      const newlyDistractedParticipantEmails = getters.distractedParticipantEmails.filter(
+        email => previouslyDistractedParticipantEmails.indexOf(email) === -1
+      )
+
+      const newlyFocussedParticipantEmails = previouslyDistractedParticipantEmails.filter(
+        email => getters.distractedParticipantEmails.indexOf(email) === -1
+      )
+
+      for (const email of newlyDistractedParticipantEmails)
+        if (email !== getters.email)
+          new Notification('Rabble', {
+            body: `${email} is not paying attention anymore`,
+          })
+
+      for (const email of newlyFocussedParticipantEmails)
+        if (email !== getters.email)
+          new Notification('Rabble', { body: `${email} is focussed again` })
     },
 
     setAttention: ({ state }, { distracted }) =>
