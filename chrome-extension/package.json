@@ -1,0 +1,15 @@
+{
+  "name": "rabble-chrome-extension",
+  "version": "1.0.0",
+  "description": "Bring Rabble mob programming closer to your desktop",
+  "main": "index.js",
+  "author": "Julien Biezemans",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "eslint": "^4.11.0",
+    "eslint-config-prettier": "^2.7.0",
+    "eslint-plugin-prettier": "^2.3.1",
+    "prettier": "^1.8.2"
+  }
+}

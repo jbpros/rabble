@@ -11,13 +11,15 @@ erl_crash.dump
 npm-debug.log
 
 # Static artifacts
-/assets/node_modules
 /assets/dist/
-/assets/npm-debug.log
-/assets/yarn-debug.log
-/assets/yarn-error.log
 /assets/.sass-cache
 /assets/.tern-port
+
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
 
 # Since we are building assets from assets/,
 # we ignore priv/static. You may want to comment
