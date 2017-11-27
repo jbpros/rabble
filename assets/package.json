@@ -11,6 +11,7 @@
     }
   },
   "dependencies": {
+    "animateplus": "^2.0.0",
     "emoji-mart-vue": "^1.0.2",
     "phoenix": "file:../deps/phoenix",
     "phoenix_html": "file:../deps/phoenix_html",

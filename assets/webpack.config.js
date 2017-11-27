@@ -52,9 +52,14 @@ module.exports = env => {
         },
         {
           test: /\.js$/,
-          exclude: /node_modules/,
+          exclude: /node_modules\/(?!animateplus)/,
           loader: 'babel-loader',
-          include: [resolve('js'), resolve('vendor'), resolve('test')],
+          include: [
+            resolve('js'),
+            resolve('vendor'),
+            resolve('test'),
+            resolve('node_modules/animateplus'),
+          ],
         },
         {
           test: /\.(gif|png|jpe?g|svg)$/i,

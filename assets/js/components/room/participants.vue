@@ -23,7 +23,7 @@ li {
 
 <script>
 import Participant from './participant.vue'
-import animate from '../../../vendor/animate'
+import animate from 'animateplus'
 
 export default {
   components: { Participant },
