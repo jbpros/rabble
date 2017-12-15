@@ -57,5 +57,4 @@ config :rabble, Rabble.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   database: "rabble_dev",
-  hostname: "localhost",
   pool_size: 10

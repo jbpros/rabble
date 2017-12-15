@@ -13,7 +13,5 @@ config :logger, level: :warn
 config :rabble, Rabble.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
-  password: "postgres",
   database: "rabble_test",
-  hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
