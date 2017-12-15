@@ -15,7 +15,6 @@ use Mix.Config
 # which you typically run after static files are built.
 config :rabble, RabbleWeb.Endpoint,
   http: [port: 4000],
-  load_from_system_env: true,
   url: [host: "rabble.cucumber.io", port: 80],
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true,
