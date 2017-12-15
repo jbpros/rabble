@@ -1,0 +1,18 @@
+APP="rabble"
+
+BUILD_HOST="rabble.cucumber.io"
+BUILD_USER="rabble"
+BUILD_AT="/home/rabble/app_build"
+
+PRODUCTION_HOSTS="rabble.cucumber.io"
+PRODUCTION_USER="rabble"
+DELIVER_TO="/home/rabble/app_release"
+
+pre_erlang_get_and_update_deps() {
+  local _prod_secret_path="/home/rabble/app_config/prod.secret.exs"
+  if [ "$TARGET_MIX_ENV" = "prod" ]; then
+    __sync_remote "
+      ln -sfn '$_prod_secret_path' '$BUILD_AT/config/prod.secret.exs'
+    "
+  fi
+}
