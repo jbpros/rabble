@@ -10,7 +10,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 // Environment
 const Env = process.env.MIX_ENV || 'dev'
-const isProd = Env === 'prod'
+const isProd = Env === 'production'
 
 function resolve(dir) {
   return path.join(__dirname, dir)
@@ -98,6 +98,11 @@ module.exports = env => {
     },
     plugins: isProd
       ? [
+          new webpack.DefinePlugin({
+            'process.env': {
+              NODE_ENV: '"production"',
+            },
+          }),
           new ExtractTextPlugin({
             filename: 'css/[name].css',
             allChunks: true,
