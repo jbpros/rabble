@@ -39,7 +39,7 @@ pre_erlang_clean_compile() {
     # prepare something
     mkdir -p priv/static # required by the phoenix.digest task
     # run your custom task
-    NODE_ENV=production node_modules/.bin/webpack --optimize-minimize --config webpack.config.js
+    MIX_ENV='$TARGET_MIX_ENV' node_modules/.bin/webpack --optimize-minimize --config webpack.config.js
   "
 
   status "Running phoenix.digest" # log output prepended with "----->"

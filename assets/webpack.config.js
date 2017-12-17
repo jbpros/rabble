@@ -10,7 +10,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 // Environment
 const Env = process.env.MIX_ENV || 'dev'
-const isProd = Env === 'production'
+const isProd = Env === 'prod'
 
 function resolve(dir) {
   return path.join(__dirname, dir)
