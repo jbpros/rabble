@@ -1,10 +1,10 @@
 APP="rabble"
 
-BUILD_HOST="rabble.cucumber.io"
+BUILD_HOST="direct.rabble.cucumber.io"
 BUILD_USER="rabble"
 BUILD_AT="/home/rabble/app_build"
 
-PRODUCTION_HOSTS="rabble.cucumber.io"
+PRODUCTION_HOSTS="direct.rabble.cucumber.io"
 PRODUCTION_USER="rabble"
 DELIVER_TO="/home/rabble/app_release"
 
