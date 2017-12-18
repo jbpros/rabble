@@ -24,3 +24,7 @@ Ready to run in production? Please [check our deployment guides](http://www.phoe
     mix edeliver build release
     mix edeliver deploy release to production
     mix edeliver start production
+
+The deployment process was based off the following documents:
+  - https://www.digitalocean.com/community/tutorials/how-to-automate-elixir-phoenix-deployment-with-distillery-and-edeliver-on-ubuntu-16-04
+  - https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-16-04
