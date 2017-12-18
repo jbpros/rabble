@@ -114,14 +114,14 @@ module.exports = env => {
               ignore: ['.*'],
             },
           ]),
-          new webpack.optimize.UglifyJsPlugin({
-            compress: {
-              warnings: false,
-            },
-            sourceMap: true,
-            beautify: false,
-            comments: false,
-          }),
+          // new webpack.optimize.UglifyJsPlugin({
+          //   compress: {
+          //     warnings: false,
+          //   },
+          //   sourceMap: true,
+          //   beautify: false,
+          //   comments: false,
+          // }),
         ]
       : [
           new ExtractTextPlugin({
