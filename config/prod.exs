@@ -18,7 +18,7 @@ config :rabble, RabbleWeb.Endpoint,
   url: [host: "rabble.cucumber.io", port: 80],
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true,
-  code_reloader: false
+  code_reloader: false,
   check_origin: ["//localhost:4000", "//rabble.cucumber.io", "//rabble.cucumber.io:4000"]
 
 # Do not print debug messages in production
